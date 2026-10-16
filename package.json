@@ -1,0 +1,22 @@
+{
+  "name": "jadian",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Jadian: permainan deduksi sosial ala kampung (Werewolf versi Malaysia).",
+  "scripts": {
+    "serve": "powershell -ExecutionPolicy Bypass -File tools/serve.ps1",
+    "android:add": "cap add android",
+    "android:assets": "capacitor-assets generate --android --assetPath resources --iconBackgroundColor #0b1121 --splashBackgroundColor #0b1121",
+    "android:sync": "cap sync android",
+    "android:open": "cap open android",
+    "android:run": "cap run android"
+  },
+  "dependencies": {
+    "@capacitor/android": "^7.0.0",
+    "@capacitor/core": "^7.0.0"
+  },
+  "devDependencies": {
+    "@capacitor/assets": "^3.0.0",
+    "@capacitor/cli": "^7.0.0"
+  }
+}

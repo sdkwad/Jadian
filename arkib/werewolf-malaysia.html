@@ -1,0 +1,1957 @@
+<title>Jadian</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
+<style>
+  /* Layout: satu lajur telefon di bawah langit malam kampung. Tab bar bawah: Utama / Pemain / Main / Watak / Tetapan.
+     Identiti: malam biru nila, emas songket sebagai aksen, oren belang untuk Harimau, hijau pandan untuk kampung. */
+  :root {
+    color-scheme: dark;
+    --sky-top: #070c1a;
+    --sky-bot: #15203d;
+    --malam: #0b1121;
+    --surface: #121a30;
+    --surface-2: #18223d;
+    --surface-3: #212d4d;
+    --garis: #2a3659;
+    --teks: #f4efe2;
+    --kabur: #a2a9bf;
+    --emas: #e2b04a;
+    --emas-ink: #2a1c04;
+    --pandan: #4cbf86;
+    --belang: #f08a3c;
+    --ungu: #b98be6;
+    --merah: #ef5a51;
+    --hill: #050912;
+    --stars: 1;
+    --f-display: 'Lilita One', 'Arial Rounded MT Bold', 'Trebuchet MS', sans-serif;
+    --f-body: 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  }
+  body.day {
+    --sky-top: #1a1424;
+    --sky-bot: #4b2f2a;
+    --surface: #1d1522;
+    --surface-2: #261c2b;
+    --surface-3: #33263a;
+    --garis: #47334a;
+    --hill: #110a0f;
+    --stars: .12;
+  }
+  [hidden] { display: none !important; }
+  * { box-sizing: border-box; }
+  html, body { min-height: 100%; }
+  body { margin: 0; background: var(--malam); color: var(--teks); font-family: var(--f-body); font-size: 15px; line-height: 1.45; -webkit-tap-highlight-color: transparent; }
+  button { font: inherit; color: inherit; }
+  :focus-visible { outline: 2px solid var(--emas); outline-offset: 2px; }
+
+  /* ---------- Langit, bulan, kampung ---------- */
+  .sky { position: fixed; inset: 0; z-index: 0; pointer-events: none; background: linear-gradient(180deg, var(--sky-top), var(--sky-bot)); transition: background .8s; }
+  .sky::before { content: ""; position: absolute; inset: 0; opacity: var(--stars); transition: opacity .8s;
+    background-image: radial-gradient(1.2px 1.2px at 18px 26px, #fff, transparent), radial-gradient(1px 1px at 92px 70px, #ffffffb0, transparent), radial-gradient(1.4px 1.4px at 150px 18px, #fff, transparent), radial-gradient(1px 1px at 200px 120px, #ffffff90, transparent), radial-gradient(1.1px 1.1px at 60px 150px, #ffffffa0, transparent), radial-gradient(1px 1px at 236px 60px, #ffffffc0, transparent);
+    background-size: 260px 190px;
+    -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 40%, transparent 78%); mask-image: linear-gradient(180deg, #000 0%, #000 40%, transparent 78%); }
+  .kampung { position: fixed; left: 0; right: 0; bottom: 0; width: 100%; height: 120px; fill: var(--hill); transition: fill .8s; pointer-events: none; }
+  .kampung .win { fill: var(--emas); opacity: .9; }
+  body.day .kampung .win { opacity: .3; }
+
+  /* Corak songket: jalur berlian emas, dipakai sedikit sahaja sebagai pemisah. */
+  .songket { height: 8px; opacity: .55; background:
+      linear-gradient(135deg, var(--emas) 25%, transparent 25%) -4px 0 / 8px 8px,
+      linear-gradient(225deg, var(--emas) 25%, transparent 25%) -4px 0 / 8px 8px,
+      linear-gradient(315deg, var(--emas) 25%, transparent 25%) 0 0 / 8px 8px,
+      linear-gradient(45deg, var(--emas) 25%, transparent 25%) 0 0 / 8px 8px; }
+
+  /* ---------- Shell ---------- */
+  .app { position: relative; z-index: 1; max-width: 560px; margin: 0 auto; padding-inline: 16px; padding-block: 12px calc(122px + env(safe-area-inset-bottom, 0px)); }
+  .topbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-block: 4px 16px; }
+  .topbar.on-home .brand { visibility: hidden; }
+  .brand { display: flex; align-items: center; gap: 10px; }
+  .brand-mark { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; background: linear-gradient(145deg, #f3a14c, #c9631d); font-size: 22px; box-shadow: inset 0 -3px 0 rgba(0,0,0,.2); }
+  .brand-name { font-family: var(--f-display); font-size: 26px; line-height: 1; letter-spacing: .04em; }
+  .brand-sub { font-size: 11px; color: var(--kabur); font-weight: 700; letter-spacing: .08em; }
+
+  .page { display: flex; flex-direction: column; gap: 14px; }
+  .page.enter { animation: rise .3s ease; }
+  @keyframes rise { from { transform: translateY(8px); opacity: .5; } to { transform: none; opacity: 1; } }
+  .pagehead { display: flex; flex-direction: column; gap: 4px; }
+  .pagehead h1 { margin: 0; font-family: var(--f-display); font-weight: 400; font-size: 36px; line-height: 1; letter-spacing: .02em; text-wrap: balance; }
+  .pagehead p { margin: 0; color: var(--kabur); font-size: 14px; max-width: 46ch; }
+  .eyebrow { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--kabur); font-weight: 800; }
+  .eyebrow.emas { color: var(--emas); }
+
+  .card { background: var(--surface); border: 1px solid var(--garis); border-radius: 20px; padding: 16px; display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+  .card-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .card-head h2 { margin: 0; font-size: 16px; font-weight: 800; }
+  .muted { color: var(--kabur); }
+  .small { font-size: 12px; }
+
+  /* ---------- Butang ---------- */
+  .btn { appearance: none; border: 1px solid transparent; border-radius: 14px; padding: 12px 16px; font-weight: 800; font-size: 14px; cursor: pointer; background: var(--surface-3); display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: transform .1s, background .2s, opacity .2s; text-align: center; }
+  .btn:active:not(:disabled) { transform: scale(.98); }
+  .btn:disabled { opacity: .38; cursor: not-allowed; }
+  .btn-emas { background: var(--emas); color: var(--emas-ink); box-shadow: 0 10px 26px -12px var(--emas), inset 0 -3px 0 rgba(0,0,0,.15); }
+  .btn-ghost { background: transparent; border-color: var(--garis); }
+  .btn-merah { background: var(--merah); color: #fff; }
+  .btn-pandan { background: var(--pandan); color: #05200f; }
+  .btn-block { width: 100%; padding: 16px; font-size: 16px; border-radius: 16px; }
+  .btn-sm { padding: 7px 11px; font-size: 12px; border-radius: 10px; }
+  .icon-btn { width: 40px; height: 40px; padding: 0; border-radius: 12px; flex: none; }
+  .icon-btn svg { width: 18px; height: 18px; }
+  .btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .btn-row > .btn { flex: 1 1 0; }
+  .linkish { background: none; border: 0; color: var(--emas); font-weight: 800; font-size: 13px; cursor: pointer; padding: 4px; }
+
+  .tag { font-size: 11px; font-weight: 800; padding: 4px 9px; border-radius: 99px; background: var(--surface-3); border: 1px solid var(--garis); white-space: nowrap; }
+  .tag.good { color: var(--pandan); border-color: rgba(76,191,134,.4); background: rgba(76,191,134,.1); }
+  .tag.bad { color: #ff9b93; border-color: rgba(239,90,81,.45); background: rgba(239,90,81,.12); }
+  .tag.warn { color: var(--emas); border-color: rgba(226,176,74,.45); background: rgba(226,176,74,.1); }
+  .tag.wolf { color: var(--belang); border-color: rgba(240,138,60,.45); background: rgba(240,138,60,.12); }
+  .tag.solo { color: #dcc0f6; border-color: rgba(185,139,230,.45); background: rgba(185,139,230,.12); }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip-btn { border: 1px solid var(--garis); background: var(--surface-3); border-radius: 99px; padding: 6px 11px; font-size: 12px; font-weight: 800; cursor: pointer; }
+  .chip-btn[aria-pressed="true"] { border-color: var(--emas); color: var(--emas); background: rgba(226,176,74,.12); }
+
+  /* ---------- Utama ---------- */
+  .hero { position: relative; overflow: hidden; border-radius: 24px; border: 1px solid var(--garis); background: linear-gradient(170deg, rgba(240,138,60,.16), rgba(18,26,48,.96) 62%); display: flex; flex-direction: column; }
+  .hero-body { position: relative; padding: 22px 18px 18px; display: flex; flex-direction: column; gap: 6px; }
+  .hero-body > :not(.moon) { position: relative; }
+  .moon { position: absolute; top: 18px; right: 18px; width: 56px; height: 56px; border-radius: 50%; pointer-events: none; background: radial-gradient(circle at 38% 36%, #fffbea, #f2e6c4 58%, #cdbd8f); box-shadow: 0 0 60px 14px rgba(242,230,196,.18); }
+  .hero h1 { margin: 0; font-family: var(--f-display); font-weight: 400; font-size: 72px; line-height: .9; letter-spacing: .03em; }
+  .hero h1 span { color: var(--belang); }
+  .hero .tagline { margin: 0; font-size: 18px; font-weight: 700; color: var(--emas); }
+  .hero p { margin: 0; color: #cfd2df; font-size: 14px; max-width: 36ch; }
+  .setup-rows { display: flex; flex-direction: column; gap: 8px; }
+  .srow { display: grid; grid-template-columns: 40px 1fr auto; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 14px; background: var(--surface-2); border: 1px solid var(--garis); cursor: pointer; text-align: left; width: 100%; }
+  .srow .ic { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; font-size: 19px; background: var(--surface-3); position: relative; }
+  .srow .ic::after { content: ""; position: absolute; right: -2px; top: -2px; width: 11px; height: 11px; border-radius: 50%; border: 2px solid var(--surface-2); background: var(--c, var(--merah)); }
+  .srow b { display: block; font-size: 14px; }
+  .srow small { display: block; color: var(--kabur); font-size: 12px; }
+  .chev { color: var(--kabur); font-size: 22px; line-height: 1; }
+  .modes { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .mode { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 12px 6px; border-radius: 14px; border: 1.5px solid var(--garis); background: var(--surface-2); cursor: pointer; text-align: center; }
+  .mode .ic { font-size: 24px; }
+  .mode b { font-size: 12px; line-height: 1.2; }
+  .mode[aria-pressed="true"] { border-color: var(--emas); background: rgba(226,176,74,.1); }
+  .mode-desc { font-size: 13px; color: var(--kabur); margin: 0; }
+  .deck { display: flex; flex-wrap: wrap; gap: 6px; }
+  .deck .tag { font-size: 12px; padding: 5px 10px; }
+
+  /* ---------- Pemain ---------- */
+  .input { flex: 1; min-width: 0; width: 100%; background: var(--surface-2); border: 1px solid var(--garis); color: var(--teks); padding: 12px 14px; border-radius: 12px; font: inherit; font-size: 15px; outline: none; }
+  .input:focus { border-color: var(--emas); }
+  select.input { appearance: none; -webkit-appearance: none; background-image: linear-gradient(45deg, transparent 50%, var(--kabur) 50%), linear-gradient(135deg, var(--kabur) 50%, transparent 50%); background-position: calc(100% - 18px) 52%, calc(100% - 13px) 52%; background-size: 5px 5px; background-repeat: no-repeat; padding-right: 34px; }
+  .addrow { display: flex; gap: 8px; }
+  .plist { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  @media (max-width: 380px) { .plist { grid-template-columns: 1fr; } }
+  .prow { display: flex; align-items: center; gap: 8px; padding: 6px 6px 6px 8px; background: var(--surface-2); border: 1px solid var(--garis); border-radius: 12px; min-width: 0; }
+  .prow .ava { width: 32px; height: 32px; font-size: 17px; }
+  .prow .nm { flex: 1; min-width: 0; font-weight: 700; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .prow .num { color: var(--kabur); font-size: 11px; font-variant-numeric: tabular-nums; }
+  .x { width: 28px; height: 28px; border-radius: 8px; border: 0; background: transparent; color: var(--kabur); cursor: pointer; font-size: 15px; flex: none; }
+  .x:hover { color: var(--merah); background: rgba(239,90,81,.12); }
+  .empty { text-align: center; padding: 22px 12px; border: 1px dashed var(--garis); border-radius: 14px; color: var(--kabur); font-size: 13px; }
+  .empty b { display: block; color: var(--teks); font-size: 15px; margin-bottom: 4px; }
+  .groups { display: flex; flex-direction: column; gap: 8px; }
+  .group { background: var(--surface-2); border: 1px solid var(--garis); border-radius: 14px; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+  .group-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .group-title { font-weight: 800; font-size: 14px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .group-members { font-size: 12px; color: var(--kabur); line-height: 1.5; }
+
+  /* ---------- Watak ---------- */
+  .seg { display: grid; grid-template-columns: 1fr 1fr; padding: 4px; background: var(--surface-2); border-radius: 13px; border: 1px solid var(--garis); gap: 4px; }
+  .seg button { border: 0; background: none; padding: 9px; border-radius: 10px; font-weight: 800; font-size: 13px; color: var(--kabur); cursor: pointer; }
+  .seg button[aria-pressed="true"] { background: var(--emas); color: var(--emas-ink); }
+  .presets { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .preset { border: 1.5px solid var(--garis); background: var(--surface-2); border-radius: 14px; padding: 10px 8px; cursor: pointer; text-align: center; display: flex; flex-direction: column; gap: 2px; }
+  .preset b { font-size: 14px; }
+  .preset small { font-size: 11px; color: var(--kabur); }
+  .preset[aria-pressed="true"] { border-color: var(--emas); background: rgba(226,176,74,.1); }
+  .balance { display: flex; flex-direction: column; gap: 8px; }
+  .balance-top { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 13px; font-weight: 800; flex-wrap: wrap; }
+  .meter { height: 10px; border-radius: 99px; background: var(--surface-3); overflow: hidden; display: flex; }
+  .meter i { display: block; height: 100%; transition: width .3s; }
+  .legend { display: flex; gap: 12px; flex-wrap: wrap; font-size: 12px; color: var(--kabur); }
+  .legend span::before { content: ""; display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 5px; background: var(--c); }
+  .rgroup { display: flex; flex-direction: column; gap: 8px; }
+  .rgroup + .rgroup { margin-top: 8px; }
+  .rgroup-h { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--c); }
+  .rgroup-h::after { content: ""; flex: 1; height: 1px; background: var(--garis); }
+  .role { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; padding: 8px; border-radius: 14px; background: var(--surface-2); border: 1px solid var(--garis); }
+  .role.on { border-color: color-mix(in srgb, var(--c) 55%, transparent); background: color-mix(in srgb, var(--c) 7%, var(--surface-2)); }
+  .role.off { opacity: .5; }
+  .role-info { display: grid; grid-template-columns: 42px 1fr; gap: 10px; align-items: center; background: none; border: 0; padding: 0; text-align: left; cursor: pointer; min-width: 0; }
+  .role-info .ic { width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center; font-size: 21px; background: color-mix(in srgb, var(--c) 16%, transparent); }
+  .role-info b { font-size: 14px; display: block; }
+  .role-info small { display: block; font-size: 12px; color: var(--kabur); line-height: 1.35; }
+  .role-info .txt { min-width: 0; }
+  .stepper { display: flex; align-items: center; gap: 4px; }
+  .stepper button { width: 32px; height: 32px; border-radius: 10px; border: 1px solid var(--garis); background: var(--surface-3); font-weight: 800; cursor: pointer; }
+  .stepper button:disabled { opacity: .28; cursor: not-allowed; }
+  .stepper span { width: 22px; text-align: center; font-weight: 800; font-variant-numeric: tabular-nums; }
+
+  .note { font-size: 13px; padding: 10px 12px; border-radius: 12px; border: 1px solid; line-height: 1.45; }
+  .note.good { background: rgba(76,191,134,.1); border-color: rgba(76,191,134,.35); color: #aee9c9; }
+  .note.warn { background: rgba(226,176,74,.1); border-color: rgba(226,176,74,.35); color: #f3d79c; }
+  .note.bad { background: rgba(239,90,81,.12); border-color: rgba(239,90,81,.4); color: #ffb9b3; }
+  .note.wolf { background: rgba(240,138,60,.12); border-color: rgba(240,138,60,.42); color: #ffcca4; }
+  .note.solo { background: rgba(185,139,230,.12); border-color: rgba(185,139,230,.45); color: #e8d6fa; }
+  .note.center { text-align: center; }
+  .note.big { font-size: 15px; font-weight: 700; }
+  .notes { display: flex; flex-direction: column; gap: 6px; }
+
+  /* ---------- Tetapan ---------- */
+  .set-row { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 12px 0; border-bottom: 1px solid var(--garis); }
+  .set-row:last-child { border-bottom: 0; padding-bottom: 0; }
+  .set-row:first-child { padding-top: 0; }
+  .set-row b { font-size: 14px; display: block; }
+  .set-row small { font-size: 12px; color: var(--kabur); display: block; }
+  .switch { position: relative; width: 48px; height: 28px; flex: none; }
+  .switch input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; z-index: 1; }
+  .switch .track { position: absolute; inset: 0; border-radius: 99px; background: var(--surface-3); border: 1px solid var(--garis); transition: background .2s; }
+  .switch .track::after { content: ""; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: var(--kabur); transition: transform .2s, background .2s; }
+  .switch input:checked + .track { background: var(--pandan); border-color: var(--pandan); }
+  .switch input:checked + .track::after { transform: translateX(20px); background: #fff; }
+  .switch input:focus-visible + .track { outline: 2px solid var(--emas); outline-offset: 2px; }
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field label { font-size: 12px; font-weight: 800; color: var(--kabur); }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  @media (max-width: 380px) { .grid2 { grid-template-columns: 1fr; } }
+
+  /* ---------- Tab bar ---------- */
+  .tabbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 5; padding: 8px 12px calc(10px + env(safe-area-inset-bottom, 0px)); display: flex; justify-content: center; pointer-events: none; }
+  .tabbar-inner { pointer-events: auto; max-width: 536px; width: 100%; display: grid; grid-template-columns: repeat(5, 1fr); align-items: end; background: rgba(8,12,24,.94); border: 1px solid var(--garis); border-radius: 22px; padding: 6px; backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); }
+  .tab { position: relative; background: none; border: 0; color: var(--kabur); font-size: 11px; font-weight: 800; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 6px 0 4px; border-radius: 14px; cursor: pointer; }
+  .tab svg { width: 22px; height: 22px; }
+  .tab[aria-current="page"] { color: var(--emas); }
+  .tab .count { position: absolute; top: 0; right: calc(50% - 22px); min-width: 17px; height: 17px; padding: 0 4px; border-radius: 99px; background: var(--belang); color: #2b1203; font-size: 10px; line-height: 17px; font-weight: 800; }
+  .tab-play { align-self: center; justify-self: center; width: 60px; height: 60px; margin-top: -28px; border-radius: 50%; border: 4px solid var(--malam); background: var(--emas); color: var(--emas-ink); display: grid; place-items: center; cursor: pointer; box-shadow: 0 10px 26px -8px var(--emas); }
+  .tab-play svg { width: 24px; height: 24px; }
+  .tab-play:disabled { background: var(--surface-3); color: var(--kabur); box-shadow: none; cursor: not-allowed; }
+
+  /* ---------- Permainan ---------- */
+  .gbar { display: flex; align-items: center; gap: 8px; }
+  .gtitle { flex: 1; min-width: 0; }
+  .gname { font-family: var(--f-display); font-size: 24px; line-height: 1.05; letter-spacing: .02em; text-wrap: balance; }
+  .gprogress { display: flex; flex-direction: column; gap: 6px; }
+  .gprogress small { color: var(--kabur); font-size: 12px; font-weight: 700; }
+  .steps { display: flex; gap: 4px; }
+  .steps i { flex: 1; height: 4px; border-radius: 9px; background: var(--garis); }
+  .steps i.done { background: var(--emas); }
+  .steps i.now { background: color-mix(in srgb, var(--emas) 50%, transparent); }
+  .stage { gap: 14px; }
+  .script { background: linear-gradient(135deg, rgba(226,176,74,.13), rgba(185,139,230,.06)); border: 1px solid rgba(226,176,74,.32); border-radius: 16px; padding: 14px; display: flex; flex-direction: column; gap: 4px; }
+  .say { font-size: 17px; font-weight: 700; line-height: 1.38; margin: 0; text-wrap: pretty; }
+  .hint { font-size: 12px; color: var(--kabur); margin: 0; }
+  .sub-h { font-size: 12px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--kabur); margin: 2px 0 -4px; }
+  .tgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 8px; }
+  .tcard { appearance: none; background: var(--surface-2); border: 2px solid var(--garis); border-radius: 14px; padding: 10px 6px; display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer; min-width: 0; transition: border-color .15s, background .15s; }
+  .tcard b { font-size: 13px; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .tcard small { font-size: 10px; color: var(--kabur); text-align: center; line-height: 1.25; }
+  .tcard.sel { border-color: var(--emas); background: rgba(226,176,74,.15); }
+  .tcard.sel-bad { border-color: var(--merah); background: rgba(239,90,81,.16); }
+  .tcard.sel-good { border-color: var(--pandan); background: rgba(76,191,134,.15); }
+  .tcard:disabled { opacity: .3; cursor: not-allowed; }
+  .ava { width: 44px; height: 44px; border-radius: 50%; background: var(--surface-3); display: grid; place-items: center; font-size: 22px; flex: none; }
+  .ava.lg { width: 80px; height: 80px; font-size: 40px; }
+
+  /* Skrin kunci & tekan-tahan: isian bergerak guna transform sahaja supaya licin pada telefon. */
+  .lock { text-align: center; padding: 10px 4px 4px; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+  .lock h3 { margin: 0; font-size: 15px; font-weight: 700; color: var(--kabur); }
+  .lock .who { font-family: var(--f-display); font-size: 42px; line-height: 1; letter-spacing: .02em; word-break: break-word; }
+  .hold { position: relative; overflow: hidden; touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+  .hold-fill { position: absolute; inset: 0; transform: scaleX(0); transform-origin: left center; background: rgba(0,0,0,.24); pointer-events: none; transition: transform .22s ease-out; will-change: transform; }
+  .hold.holding .hold-fill { transform: scaleX(1); transition: transform var(--hold-ms, 650ms) linear; }
+  .hold.holding { transform: scale(.985); }
+  .hold-label { position: relative; }
+
+  /* Kad identiti: jalur songket di atas. Animasi "terbalik" cuma sekali, sejurus selepas dibuka. */
+  .kad { border-radius: 18px; overflow: hidden; border: 1px solid color-mix(in srgb, var(--c) 50%, transparent); background: radial-gradient(120% 90% at 50% 0%, color-mix(in srgb, var(--c) 26%, transparent), var(--surface-2) 70%); }
+  .kad.anim { animation: reveal .42s cubic-bezier(.2,.8,.2,1) both; will-change: transform, opacity; }
+  .reveal-in { animation: fadeup .35s .12s cubic-bezier(.2,.8,.2,1) both; }
+  @keyframes reveal { from { transform: perspective(900px) rotateY(-70deg) scale(.96); opacity: 0; } to { transform: none; opacity: 1; } }
+  @keyframes fadeup { from { transform: translateY(10px); opacity: 0; } to { transform: none; opacity: 1; } }
+  .kad .songket { opacity: .7; }
+  .kad-body { padding: 16px; display: flex; flex-direction: column; align-items: center; gap: 4px; text-align: center; }
+  .kad .big { font-size: 46px; line-height: 1.1; }
+  .kad .rn { font-family: var(--f-display); font-size: 32px; line-height: 1.05; letter-spacing: .02em; }
+  .kad p { margin: 0; font-size: 13px; color: #d7d9e4; max-width: 40ch; }
+
+  .list { display: flex; flex-direction: column; gap: 6px; }
+  .lrow { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 12px; background: var(--surface-2); border: 1px solid var(--garis); font-size: 13px; }
+  .lrow > span:first-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .lrow > span:last-child { text-align: right; flex: none; }
+  .lrow.dead { opacity: .55; }
+  .ring { position: relative; width: 190px; height: 190px; margin: 4px auto; }
+  .ring.sm { width: 128px; height: 128px; }
+  .ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+  .ring circle { fill: none; stroke-width: 8; }
+  .ring .bg { stroke: var(--surface-3); }
+  .ring .fg { stroke: var(--emas); stroke-linecap: round; transition: stroke-dashoffset 1s linear; }
+  .ring.done .fg { stroke: var(--merah); }
+  .ring-txt { position: absolute; inset: 0; display: grid; place-items: center; font-family: var(--f-display); font-size: 46px; font-variant-numeric: tabular-nums; }
+  .ring.sm .ring-txt { font-size: 30px; }
+  .ring.done .ring-txt { color: #ff9b93; }
+  .win-banner { text-align: center; border-radius: 22px; overflow: hidden; background: radial-gradient(120% 90% at 50% 0%, color-mix(in srgb, var(--c) 35%, transparent), var(--surface-2)); border: 1px solid color-mix(in srgb, var(--c) 50%, transparent); }
+  .win-banner .body { padding: 24px 16px; display: flex; flex-direction: column; gap: 6px; }
+  .win-banner .big { font-size: 52px; }
+  .win-banner h2 { margin: 0; font-family: var(--f-display); font-weight: 400; font-size: 38px; line-height: 1.05; letter-spacing: .02em; text-wrap: balance; }
+  .win-banner p { margin: 0; color: #d7d9e4; font-size: 14px; }
+  .log { display: flex; flex-direction: column; gap: 6px; max-height: 280px; overflow-y: auto; }
+  .log div { font-size: 12px; padding: 8px 10px; border-radius: 10px; background: var(--surface-2); border-left: 3px solid var(--emas); }
+  .potion { display: grid; grid-template-columns: 44px 1fr; gap: 10px; align-items: center; padding: 10px 12px; border-radius: 14px; background: var(--surface-2); border: 1px solid var(--garis); }
+  .potion .ic { font-size: 26px; text-align: center; }
+  .potion b { display: block; font-size: 14px; }
+  .potion small { color: var(--kabur); font-size: 12px; }
+  .event { display: grid; grid-template-columns: 52px 1fr; gap: 12px; align-items: center; padding: 12px 14px; border-radius: 16px; background: linear-gradient(135deg, rgba(226,176,74,.18), rgba(240,138,60,.08)); border: 1px solid rgba(226,176,74,.45); }
+  .event .ic { font-size: 36px; text-align: center; }
+  .event b { display: block; font-size: 15px; }
+  .event small { color: #e9dcc0; font-size: 13px; }
+  .radar { display: flex; flex-direction: column; gap: 6px; }
+  .rbar { position: relative; display: flex; justify-content: space-between; gap: 10px; padding: 8px 12px; border-radius: 10px; background: var(--surface-2); overflow: hidden; font-size: 13px; }
+  .rbar i { position: absolute; inset: 0 auto 0 0; background: rgba(240,138,60,.22); }
+  .rbar span { position: relative; }
+  .trow { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center; padding: 8px 10px; border-radius: 14px; background: var(--surface-2); border: 1px solid var(--garis); }
+  .trow .nm { font-weight: 800; font-size: 14px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .trow .score { font-family: var(--f-display); font-size: 24px; min-width: 34px; text-align: right; font-variant-numeric: tabular-nums; }
+  .trow.lead { border-color: var(--merah); background: rgba(239,90,81,.1); }
+  .ghost { display: flex; flex-direction: column; gap: 6px; padding: 10px 12px; border-radius: 14px; background: var(--surface-2); border: 1px dashed var(--garis); }
+
+  /* QR & kad pemain. QR sentiasa hitam atas putih supaya kamera telefon senang baca. */
+  .qr { background: #fff; padding: 12px; border-radius: 16px; width: min(78vw, 300px); max-width: 100%; margin: 0 auto; transition: filter .25s; }
+  .qr svg { width: 100%; height: auto; display: block; }
+  .qr.blur { filter: blur(12px); }
+  .cv-head { display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; }
+  .cv-head .who { font-family: var(--f-display); font-size: 36px; line-height: 1; word-break: break-word; }
+  .kad-back { border-radius: 18px; overflow: hidden; border: 1px solid rgba(226,176,74,.45); background: radial-gradient(110% 80% at 50% 30%, rgba(240,138,60,.22), var(--surface-2) 70%); }
+  .kad-back-body { padding: 34px 16px; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+  .kad-back .big { font-size: 56px; }
+  .kad-back .rn { font-family: var(--f-display); font-size: 34px; letter-spacing: .08em; }
+  details.help { font-size: 13px; color: var(--kabur); background: var(--surface-2); border: 1px solid var(--garis); border-radius: 12px; padding: 10px 12px; }
+  details.help summary { cursor: pointer; font-weight: 800; color: var(--teks); }
+  details.help p { margin: 8px 0 0; }
+
+  /* ---------- Modal, sheet, toast ---------- */
+  .modal-back { position: fixed; inset: 0; z-index: 30; background: rgba(3,6,14,.74); display: grid; place-items: center; padding: 16px; }
+  .modal { width: 100%; max-width: 380px; background: var(--surface-2); border: 1px solid var(--garis); border-radius: 20px; padding: 20px; display: flex; flex-direction: column; gap: 10px; }
+  .modal h3 { margin: 0; font-size: 18px; }
+  .modal p { margin: 0; color: var(--kabur); font-size: 14px; }
+  .sheet-back { position: fixed; inset: 0; z-index: 25; background: rgba(3,6,14,.7); display: flex; align-items: flex-end; justify-content: center; }
+  .sheet { width: 100%; max-width: 560px; max-height: 86vh; overflow-y: auto; background: var(--surface); border: 1px solid var(--garis); border-bottom: 0; border-radius: 24px 24px 0 0; padding: 0 16px calc(20px + env(safe-area-inset-bottom, 0px)); animation: up .25s ease; }
+  @keyframes up { from { transform: translateY(30px); } to { transform: none; } }
+  .sheet-grip { width: 44px; height: 5px; border-radius: 9px; background: var(--garis); margin: 10px auto 12px; }
+  .sheet-content { display: flex; flex-direction: column; gap: 12px; }
+  .facts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .fact { background: var(--surface-2); border: 1px solid var(--garis); border-radius: 12px; padding: 10px 12px; }
+  .fact small { display: block; font-size: 11px; color: var(--kabur); font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+  .fact b { font-size: 14px; }
+  .howto { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 8px; font-size: 14px; }
+  .toast { position: fixed; left: 50%; bottom: calc(104px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); z-index: 40; background: var(--teks); color: #1c1608; padding: 10px 16px; border-radius: 12px; font-size: 13px; font-weight: 800; max-width: calc(100% - 32px); box-shadow: 0 10px 30px -10px #000; animation: toast .25s ease; }
+  @keyframes toast { from { transform: translate(-50%, 8px); } to { transform: translate(-50%, 0); } }
+
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+</style>
+
+<div class="sky" aria-hidden="true"></div>
+<svg class="kampung" viewBox="0 0 400 90" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+  <path d="M0 80 Q100 71 200 77 T400 75 V90 H0Z"/>
+  <path d="M50 52 L78 34 L106 52 Z M57 52 h42 v14 h-42z M60 66 h3 v12 h-3z M76 66 h3 v12 h-3z M93 66 h3 v12 h-3z"/>
+  <path d="M248 56 L270 42 L292 56Z M254 56 h32 v11 h-32z M257 67 h2.5 v10 h-2.5z M281 67 h2.5 v10 h-2.5z"/>
+  <path d="M160 79 C162 62 158 47 163 32 l2 0 C161 47 165 62 164 79Z"/>
+  <path d="M164 32 C150 26 140 30 134 36 C146 30 156 31 164 33Z M164 32 C176 24 188 27 194 34 C182 29 172 30 164 33Z M164 32 C158 20 150 16 142 16 C152 20 158 25 163 32Z M164 32 C170 20 178 15 186 16 C176 20 170 25 165 32Z"/>
+  <path d="M332 79 C333 65 330 54 334 42 l1.8 0 C332 54 335 65 334.5 79Z"/>
+  <path d="M335 42 C324 37 316 40 311 45 C320 40 328 41 335 43Z M335 42 C345 36 354 38 359 44 C350 40 342 41 335 43Z M335 42 C330 33 324 30 318 30 C326 33 330 37 334 42Z M335 42 C340 33 346 30 352 30 C345 33 341 37 336 42Z"/>
+  <rect class="win" x="72" y="55" width="8" height="6" rx="1"/>
+  <rect class="win" x="267" y="59" width="6" height="5" rx="1"/>
+</svg>
+
+<div class="app">
+  <header class="topbar" id="topbar">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true">🐯</div>
+      <div><div class="brand-name">JADIAN</div><div class="brand-sub">Siapa harimau malam ni?</div></div>
+    </div>
+    <button class="btn btn-ghost icon-btn" id="soundTop" onclick="window.toggleSound()" aria-label="Bunyi"></button>
+  </header>
+
+  <!-- ==================== UTAMA ==================== -->
+  <section class="page" id="pg_home">
+    <div class="hero">
+      <div class="hero-body">
+        <div class="moon" aria-hidden="true"></div>
+        <span class="eyebrow emas">Permainan deduksi ala kampung</span>
+        <h1>JADI<span>AN</span></h1>
+        <p class="tagline">Siapa harimau malam ni?</p>
+        <p>Siang jadi orang, malam jadi harimau. Kumpul geng, cari Harimau Jadian sebelum kampung habis diserbu.</p>
+      </div>
+      <div class="songket" aria-hidden="true"></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h2>Persediaan</h2><button class="linkish" onclick="window.openHowTo()">Cara main ›</button></div>
+      <div class="setup-rows" id="setupRows"></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h2>Mod permainan</h2><span class="tag" id="modeTag"></span></div>
+      <div class="modes" id="modeList"></div>
+      <p class="mode-desc" id="modeDesc"></p>
+    </div>
+    <div class="card">
+      <div class="card-head"><h2>Kad dalam dek</h2><button class="linkish" onclick="window.go('roles')">Ubah ›</button></div>
+      <div class="deck" id="homeDeck"></div>
+    </div>
+    <button class="btn btn-emas btn-block" id="homeStart" onclick="window.startGame()">Mula</button>
+  </section>
+
+  <!-- ==================== PEMAIN ==================== -->
+  <section class="page" id="pg_players" hidden>
+    <div class="pagehead"><span class="eyebrow emas">Orang kampung</span><h1>Pemain</h1><p>Tambah 4 hingga 20 orang. Simpan geng yang selalu main, lain kali tekan sekali je.</p></div>
+    <div class="card">
+      <div class="card-head"><h2>Senarai semasa</h2><span class="tag" id="pCount">0 pemain</span></div>
+      <form class="addrow" onsubmit="event.preventDefault(); window.addPlayer();">
+        <input id="newPlayerInput" class="input" placeholder="Nama pemain" maxlength="20" autocomplete="off" />
+        <button class="btn btn-emas" type="submit">Tambah</button>
+      </form>
+      <div id="playerList"></div>
+      <div class="btn-row" id="playerTools">
+        <button class="btn btn-ghost btn-sm" onclick="window.toggleSaveForm()">Simpan senarai ini</button>
+        <button class="btn btn-ghost btn-sm" onclick="window.clearAllPlayers()">Kosongkan</button>
+      </div>
+      <form id="saveFormBox" class="addrow" hidden onsubmit="event.preventDefault(); window.saveCurrentToNewGroup();">
+        <input id="saveGroupNameInput" class="input" placeholder="Nama senarai, cth: Geng Lepak" maxlength="30" autocomplete="off" />
+        <button class="btn btn-pandan" type="submit">Simpan</button>
+      </form>
+    </div>
+    <div class="card">
+      <div class="card-head"><h2>Senarai tersimpan</h2><span class="tag" id="gCount">0</span></div>
+      <div class="groups" id="savedGroupsList"></div>
+    </div>
+  </section>
+
+  <!-- ==================== WATAK ==================== -->
+  <section class="page" id="pg_roles" hidden>
+    <div class="pagehead"><span class="eyebrow emas">Kad watak</span><h1>Watak</h1><p>Auto-Balance pilih kad ikut bilangan pemain. Manual Bebas biar kau susun sendiri. Ketik nama watak untuk baca penuh.</p></div>
+    <div class="card">
+      <div class="seg" role="group" aria-label="Cara susun watak">
+        <button id="tabAuto" onclick="window.setBalanceMode('auto')">Auto-Balance</button>
+        <button id="tabManual" onclick="window.setBalanceMode('manual')">Manual Bebas</button>
+      </div>
+      <div class="presets" id="presetBar">
+        <button class="preset" id="pb_santai" onclick="window.setAutoPreset('santai')"><b>Santai</b><small>Watak asas</small></button>
+        <button class="preset" id="pb_kecoh" onclick="window.setAutoPreset('kecoh')"><b>Kecoh</b><small>Mindgame &amp; solo</small></button>
+        <button class="preset" id="pb_ganas" onclick="window.setAutoPreset('ganas')"><b>Ganas</b><small>Banyak pembunuh</small></button>
+      </div>
+      <div class="balance">
+        <div class="balance-top"><span id="totLbl">0 / 0 kad</span><span id="scoreLbl" class="tag">Tiada pemain</span></div>
+        <div class="meter"><i style="background:var(--pandan)" id="mGood"></i><i style="background:var(--ungu)" id="mSolo"></i><i style="background:var(--belang)" id="mBad"></i></div>
+        <div class="legend">
+          <span style="--c:var(--pandan)" id="goodLbl">Kampung 0</span>
+          <span style="--c:var(--belang)" id="badLbl">Harimau 0</span>
+          <span style="--c:var(--ungu)" id="soloLbl">Solo 0</span>
+        </div>
+      </div>
+      <div class="notes" id="diagBox"></div>
+    </div>
+    <div class="card" id="roleList"></div>
+  </section>
+
+  <!-- ==================== TETAPAN ==================== -->
+  <section class="page" id="pg_settings" hidden>
+    <div class="pagehead"><span class="eyebrow emas">Adat kampung</span><h1>Tetapan</h1><p>Peraturan rumah, ciri permainan dan masa. Tetapan ini diingat pada peranti ini.</p></div>
+    <div class="card"><div class="card-head"><h2>Ciri permainan</h2></div><div id="featuresBox"></div></div>
+    <div class="card"><div class="card-head"><h2>Peraturan watak</h2></div><div id="rulesBox"></div></div>
+    <div class="card">
+      <div class="card-head"><h2>Undian &amp; masa</h2></div>
+      <div class="field"><label for="selVoteMode">Cara undian</label>
+        <select id="selVoteMode" class="input" onchange="window.setPref('voteMode', this.value)">
+          <option value="mahkamah">Mahkamah Kampung (tuduh, bela diri, kira undi)</option>
+          <option value="pantas">Undian Pantas (pilih terus siapa dihalau)</option>
+        </select></div>
+      <div class="grid2">
+        <div class="field"><label for="selDiscuss">Mesyuarat siang</label>
+          <select id="selDiscuss" class="input" onchange="window.setPref('disc', this.value)">
+            <option value="60">1 minit</option><option value="120">2 minit</option><option value="180">3 minit</option><option value="300">5 minit</option><option value="auto">Auto (30 saat × pemain)</option>
+          </select></div>
+        <div class="field"><label for="selVote">Undian / bela diri</label>
+          <select id="selVote" class="input" onchange="window.setPref('vote', this.value)">
+            <option value="30">30 saat</option><option value="45">45 saat</option><option value="60">60 saat</option><option value="90">90 saat</option>
+          </select></div>
+      </div>
+      <div class="field"><label for="selHold">Masa minimum setiap giliran Pass &amp; Play</label>
+        <select id="selHold" class="input" onchange="window.setPref('hold', this.value)">
+          <option value="0">Tiada</option><option value="4">4 saat</option><option value="6">6 saat</option><option value="8">8 saat</option>
+        </select></div>
+    </div>
+    <div class="card">
+      <div class="set-row"><div><b>Bunyi</b><small>Bunyi klik, pagi dan amaran masa tamat.</small></div>
+        <label class="switch"><input type="checkbox" id="rSound" onchange="window.toggleSound()" aria-label="Bunyi" /><span class="track"></span></label></div>
+    </div>
+  </section>
+
+  <!-- ==================== PERMAINAN ==================== -->
+  <section class="page" id="pg_game" hidden>
+    <div class="gbar">
+      <button class="btn btn-ghost icon-btn" onclick="window.exitGame()" aria-label="Keluar permainan">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+      <div class="gtitle"><div class="eyebrow emas" id="gEyebrow">Malam 1</div><div class="gname" id="gTitle">Malam</div></div>
+      <button class="btn btn-ghost btn-sm" id="undoBtn" onclick="window.undoLastStep()">↶ Undo</button>
+      <button class="btn btn-ghost btn-sm" id="noteBtn" onclick="window.toggleNotes()">Nota</button>
+    </div>
+    <div class="gprogress" id="gProgress" hidden></div>
+    <div class="card" id="notesCard" hidden>
+      <div class="card-head"><h2>Buku nota</h2><button class="linkish" onclick="window.toggleNotes()">Tutup</button></div>
+      <div class="list" id="noteList"></div>
+    </div>
+    <div class="card stage" id="stage"></div>
+  </section>
+
+  <!-- ==================== KAD PEMAIN (dibuka dari QR) ==================== -->
+  <section class="page" id="pg_card" hidden>
+    <div class="brand" style="justify-content:center;padding-block:4px 6px;">
+      <div class="brand-mark" aria-hidden="true">🐯</div>
+      <div><div class="brand-name">JADIAN</div><div class="brand-sub">Kad watak kau</div></div>
+    </div>
+    <div class="card stage" id="cardStage"></div>
+  </section>
+</div>
+
+<nav class="tabbar" id="tabbar" aria-label="Menu utama">
+  <div class="tabbar-inner">
+    <button class="tab" data-pg="home" onclick="window.go('home')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 11l9-7 9 7M5 10v10h5v-5h4v5h5V10"/></svg>Utama</button>
+    <button class="tab" data-pg="players" onclick="window.go('players')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5"/><circle cx="17" cy="9" r="2.6"/><path d="M16.5 14.6c2.6.1 4.4 1.8 5 4.6"/></svg>Pemain<span class="count" id="tabCount" hidden></span></button>
+    <button class="tab-play" id="tabPlay" onclick="window.startGame()" aria-label="Mula permainan"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.4-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z"/></svg></button>
+    <button class="tab" data-pg="roles" onclick="window.go('roles')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="5" width="11" height="15" rx="2" transform="rotate(-8 8.5 12.5)"/><rect x="10" y="4" width="11" height="15" rx="2" transform="rotate(8 15.5 11.5)"/></svg>Watak</button>
+    <button class="tab" data-pg="settings" onclick="window.go('settings')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2.2"/><circle cx="10" cy="17" r="2.2"/></svg>Tetapan</button>
+  </div>
+</nav>
+
+<div class="sheet-back" id="sheet" hidden onclick="if(event.target===this) window.closeSheet()">
+  <div class="sheet" role="dialog" aria-modal="true"><div class="sheet-grip"></div><div class="sheet-content" id="sheetContent"></div></div>
+</div>
+<div class="modal-back" id="modal" hidden onclick="if(event.target===this) window.modalClose(false)">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="mTitle">
+    <h3 id="mTitle"></h3><p id="mBody"></p>
+    <div class="btn-row" style="margin-top:6px;"><button class="btn btn-ghost" onclick="window.modalClose(false)">Batal</button><button class="btn btn-emas" id="mOk" onclick="window.modalClose(true)">Ya</button></div>
+  </div>
+</div>
+<div class="toast" id="toast" hidden role="status"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+<script>
+(function () {
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+  /* ==================== DATA WATAK ====================
+     Setiap watak satu rekod. f = puak, w = berat imbangan, seer = cara Tok Nujum nampak, wake = bangun malam,
+     n1 = Malam 1 sahaja, multi = boleh lebih daripada 1 kad dalam dek. Enjin, skrip dan Auto-Balance dibina daripada sini. */
+  const ROLES = {
+    orang_kampung: { n: 'Orang Kampung', i: '🧑‍🌾', f: 'good', w: 1, seer: 'good', wake: false, multi: true, s: 'Tiada kuasa. Undi dengan bijak.', d: 'Tiada kuasa malam. Waktu siang, perhati, tuduh dan undi Harimau keluar dari kampung.' },
+    tok_nujum: { n: 'Tok Nujum', i: '🔮', f: 'good', w: 4, seer: 'good', wake: true, s: 'Tilik 1 pemain setiap malam.', d: 'Setiap malam tilik 1 pemain dan dapat tahu sama ada dia BAIK atau BAHAYA. Harimau, Toyol, Pontianak dan Pak Pandir nampak BAHAYA.' },
+    pak_belalang: { n: 'Pak Belalang', i: '🦗', f: 'good', w: -1, seer: 'good', wake: true, s: 'Sangka dirinya Tok Nujum.', d: 'App tunjuk kad Tok Nujum kepadanya, jadi dia betul-betul sangka dia Tok Nujum. Tapi keputusan tilikannya rawak. Identiti sebenar cuma terdedah bila dia mati.' },
+    mak_bidan: { n: 'Mak Bidan', i: '🌿', f: 'good', w: 3, seer: 'good', wake: true, s: 'Jaga 1 pemain setiap malam.', d: 'Setiap malam pilih 1 pemain untuk dijaga. Pemain itu selamat daripada semua serangan malam itu.' },
+    mak_dukun: { n: 'Mak Dukun', alt: 'Tok Herba', i: '⚗️', f: 'good', w: 4, seer: 'good', wake: true, s: 'Air Penawar & Racun, sekali setiap satu.', d: 'Bangun selepas Harimau dan nampak mangsa malam itu. Ada 2 botol, sekali guna setiap satu: Air Penawar menyelamatkan mangsa Harimau, Racun membunuh 1 pemain.' },
+    mak_cik_bawang: { n: 'Mak Cik Bawang', i: '🧅', f: 'good', w: 3, seer: 'good', wake: true, s: 'Intai 1 rumah, tahu siapa keluar.', d: 'Setiap malam intai rumah 1 pemain. Dia dapat tahu sama ada penghuni rumah itu keluar waktu malam (ada kuasa malam), walaupun kuasanya dicuri Toyol.' },
+    pemburu: { n: 'Pemburu', i: '🏹', f: 'good', w: 3, seer: 'good', wake: false, s: 'Bila mati, tembak 1 pemain.', d: 'Bila mati (malam atau siang), dia boleh terus tembak 1 pemain lain, atau pilih untuk tak tembak.' },
+    cikgu: { n: 'Cikgu Disiplin', i: '📏', f: 'good', w: 2, seer: 'good', wake: true, s: 'Denda 1 pemain: diam esok.', d: 'Setiap malam denda 1 pemain. Pemain itu dilarang bercakap sepanjang mesyuarat esok. Tak boleh denda orang sama 2 malam berturut.' },
+    peronda: { n: 'Peronda RT', i: '🔦', f: 'good', w: 3, seer: 'good', wake: true, s: 'Kawal 1 rumah, mati menggantikan.', d: 'Setiap malam kawal rumah 1 pemain lain. Kalau rumah itu diserang, Peronda yang mati menggantikan tuan rumah.' },
+    ketua: { n: 'Ketua Kampung', i: '🏛️', f: 'good', w: 2, seer: 'good', wake: false, s: 'Undi dikira 2 selepas dedah diri.', d: 'Boleh dedah diri waktu siang. Selepas disahkan app, undinya dikira 2. Kalau orang lain mengaku Ketua Kampung, app akan umum dia menipu.' },
+    anak_datuk: { n: 'Anak Datuk', i: '🎩', f: 'good', w: 2, seer: 'good', wake: false, s: 'Kebal undian sekali.', d: 'Kali pertama diundi keluar, wataknya didedahkan dan dia terselamat. Kali kedua, dia keluar macam orang lain.' },
+    abang_sado: { n: 'Abang Sado', i: '💪', f: 'good', w: 2, seer: 'good', wake: false, s: 'Tahan 1 serangan malam.', d: 'Badan tegap. Serangan malam pertama ke atasnya (Harimau, Pontianak atau Racun) gagal. Serangan kedua baru dia tumbang.' },
+    mak_andam: { n: 'Mak Andam', i: '💐', f: 'good', w: 0, seer: 'good', wake: true, n1: true, s: 'Jodohkan 2 pemain pada Malam 1.', d: 'Malam 1 jodohkan 2 pemain jadi pasangan. Kalau seorang mati, pasangannya mati merana. Kalau pasangan dari pihak berbeza, mereka menang berdua bila tinggal mereka sahaja.' },
+    pak_pandir: { n: 'Pak Pandir', i: '🙃', f: 'good', w: 0, seer: 'bad', wake: false, s: 'Orang baik, tapi nampak BAHAYA.', d: 'Orang kampung biasa yang lurus bendul. Malangnya Tok Nujum nampak dia BAHAYA.' },
+    kena_gigit: { n: 'Kena Gigit', i: '🩹', f: 'good', w: -1, seer: 'good', wake: false, s: 'Kalau diserbu, jadi Harimau.', d: 'Orang kampung biasa. Kalau diserbu Harimau, dia tak mati tetapi bertukar jadi Harimau Jadian dan sertai kawanan.' },
+    harimau: { n: 'Harimau Jadian', i: '🐯', f: 'wolf', w: -4, seer: 'bad', wake: true, pack: true, multi: true, s: 'Serbu 1 mangsa setiap malam.', d: 'Siang jadi orang, malam jadi harimau. Bangun bersama kawanan dan pilih 1 mangsa setiap malam.' },
+    anak_harimau: { n: 'Anak Harimau', i: '🐾', f: 'wolf', w: -5, seer: 'bad', wake: true, pack: true, s: 'Bila mati, kawanan serbu 2.', d: 'Ahli kawanan Harimau. Kalau dia mati, kawanan yang marah dapat serbu 2 mangsa pada malam berikutnya.' },
+    harimau_tua: { n: 'Harimau Tua', i: '🐅', f: 'wolf', w: -5, seer: 'bad', wake: true, pack: true, s: 'Sekali: gigit mangsa jadi Harimau.', d: 'Ketua kawanan. Sekali sepanjang permainan, dia boleh gigit mangsa supaya mangsa bertukar jadi Harimau Jadian, bukan mati. Gigitan gagal (dan boleh dicuba lagi) kalau mangsa dijaga, dikawal Peronda, Pontianak atau Abang Sado.' },
+    toyol: { n: 'Toyol', i: '🧌', f: 'wolf', w: -3, seer: 'bad', wake: true, s: 'Curi kuasa 1 pemain setiap malam.', d: 'Pihak Harimau, tapi bangun seorang diri dan tak kenal kawanan. Setiap malam curi kuasa 1 pemain: kuasa orang itu batal malam itu. Kalau dia curi kuasa Harimau yang tinggal seorang, malam itu tiada serbuan. Mak Andam dan Hantu Raya tak boleh dicuri.' },
+    pelesit: { n: 'Pelesit', i: '🦟', f: 'wolf', w: -3, seer: 'good', wake: true, s: 'Intai siapa Tok Nujum & Mak Dukun.', d: 'Utusan pihak Harimau yang bangun seorang diri dan tak kenal kawanan. Setiap malam intai 1 pemain untuk tahu sama ada dia Tok Nujum atau Mak Dukun. Tok Nujum nampak dia BAIK.' },
+    musuh: { n: 'Musuh Dalam Selimut', i: '🛏️', f: 'wolf', w: -2, seer: 'good', wake: false, s: 'Pengkhianat yang tak kenal kawanan.', d: 'Pihak Harimau, tapi tak bangun malam dan tak kenal kawanan. Tok Nujum nampak dia BAIK. Bila Harimau terakhir mati, dia bertukar jadi Harimau Jadian.' },
+    pontianak: { n: 'Pontianak', i: '👻', f: 'solo', w: -6, seer: 'bad', wake: true, s: 'Bunuh 1 setiap malam, menang sendiri.', d: 'Bunuh 1 pemain setiap malam dan kebal serangan Harimau. Menang bila tinggal dia seorang, atau berdua dengan seorang lagi.' },
+    si_luncai: { n: 'Si Luncai', i: '🎃', f: 'solo', w: -1, seer: 'good', wake: false, s: 'Menang kalau diundi keluar.', d: 'Biarlah, biarlah! Menang serta-merta kalau berjaya buat kampung mengundinya keluar.' },
+    hantu_raya: { n: 'Hantu Raya', i: '👥', f: 'solo', w: 0, seer: 'good', wake: true, n1: true, s: 'Pilih tuan, warisi wataknya.', d: 'Malam 1 pilih seorang tuan. Bila tuan mati, Hantu Raya ambil alih wataknya secara rahsia dan main untuk pihak itu. Kalau permainan tamat sebelum tuan mati, Hantu Raya kalah.' },
+    pendendam: { n: 'Si Pendendam', i: '🎯', f: 'solo', w: -1, seer: 'good', wake: false, s: 'Buat sasaran diundi keluar.', d: 'App beri 1 sasaran dari pihak kampung. Menang serta-merta kalau sasaran itu diundi keluar. Kalau sasaran mati dengan cara lain, dendamnya bertukar dan dia jadi Si Luncai.' }
+  };
+  const IDS = Object.keys(ROLES);
+  const FACTIONS = [
+    { f: 'good', name: 'Pasukan Kampung', c: 'var(--pandan)' },
+    { f: 'wolf', name: 'Pihak Harimau', c: 'var(--belang)' },
+    { f: 'solo', name: 'Pemain Solo', c: 'var(--ungu)' }
+  ];
+  const FC = { good: 'var(--pandan)', wolf: 'var(--belang)', solo: 'var(--ungu)', none: 'var(--kabur)', love: '#f27fa8' };
+  const FNAME = { good: 'Pasukan Kampung', wolf: 'Pihak Harimau', solo: 'Solo' };
+  const MODES = [
+    { id: 'mod_digital', ic: '🎙️', name: 'Moderator', d: 'Seorang jadi moderator. Pemain imbas QR guna telefon sendiri, atau lihat kad di telefon moderator. Lepas tu moderator baca skrip malam.' },
+    { id: 'pass_play', ic: '📱', name: 'Pass & Play', d: 'Tiada moderator, semua orang main. Telefon diedar ikut giliran dengan skrin kunci dan misi Anti-Kantoi.' }
+  ];
+  const EVENTS = {
+    purnama: { i: '🌕', n: 'Bulan Purnama', d: 'Harimau makin ganas. Malam ni kawanan serbu 1 rumah tambahan.' },
+    kenduri: { i: '💒', n: 'Kenduri Kahwin', d: 'Seluruh kampung makan nasi minyak. Malam ni Harimau kekenyangan dan tak menyerbu.' },
+    banjir: { i: '🌊', n: 'Banjir Kilat', d: 'Balai raya dinaiki air. Tiada undian hari ini.' },
+    blackout: { i: '🔌', n: 'Blackout', d: 'Bekalan elektrik terputus. Malam ni semua kuasa tilik dan intai tak nampak apa-apa.' },
+    pasar: { i: '🛍️', n: 'Pasar Malam', d: 'Orang ramai lepak lama. Mesyuarat hari ini dapat 1 minit tambahan.' },
+    hujan: { i: '⛈️', n: 'Hujan Lebat', d: 'Semua nak cepat balik. Masa mesyuarat hari ini dipotong separuh.' },
+    gotong: { i: '🧹', n: 'Gotong-royong', d: 'Sebelum mengundi, setiap orang mesti sebut 1 nama yang dia syak dan sebabnya.' }
+  };
+  const AVA = ['😎','🥳','🤠','🦊','🐼','🦁','🐸','🐵','🦄','🐝','🦉','🦖','🐙','🦋','🐢','🐨','🐧','🦜','🐰','🐻'];
+  const emptyRc = () => Object.fromEntries(IDS.map((k) => [k, 0]));
+  const isPack = (p) => !!(p && p.role && ROLES[p.role].pack);
+  const INFO = ['tok_nujum', 'pak_belalang', 'pelesit', 'mak_cik_bawang'];
+
+  let soundOn = true, actx = null, timerInt = null, holdT = null, remSec = 0, timerTotal = 0, minInt = null, minUntil = 0, flipNext = false;
+  let tempTargetId = null, tempTargets = [], tempDukun = { save: null, poison: null }, tempBite = false, tempQR = false, seerDone = false;
+  let history = [], game = null, editingGroupId = null, modalOk = null, toastT = null;
+
+  const setup = {
+    mode: 'mod_digital', balMode: 'auto', preset: 'santai', disc: '180', vote: '45', hold: '6', voteMode: 'mahkamah',
+    players: [], rc: emptyRc(),
+    rules: { skImmune: true, docSelf: true, docNoRep: true, dukunSelf: false, loneWolf: true, reveal: true, neutral: false, ghost: true, radar: true, events: true, callDead: true }
+  };
+  const FEATURES = [
+    { k: 'events', name: 'Kad Peristiwa', d: 'Kadang-kadang ada peristiwa kampung waktu pagi: Bulan Purnama, Kenduri Kahwin, Banjir Kilat dan lain-lain.' },
+    { k: 'ghost', name: 'Roh Penasaran', d: 'Pemain yang dah mati dapat 1 undi terakhir dalam Mahkamah Kampung.' },
+    { k: 'radar', name: 'Radar Syak', d: 'Pass & Play: pilihan Anti-Kantoi dikumpul dan ditunjuk tanpa nama waktu pagi.' },
+    { k: 'callDead', name: 'Panggil watak yang dah mati', d: 'Mod Moderator: skrip tetap panggil watak yang dah mati, supaya pemain tak dapat teka siapa yang dah tiada.' }
+  ];
+  const RULES = [
+    { k: 'skImmune', name: 'Pontianak kebal Harimau', d: 'Serbuan Harimau tak boleh bunuh Pontianak.' },
+    { k: 'docSelf', name: 'Mak Bidan boleh jaga diri', d: 'Mak Bidan boleh pilih dirinya sendiri.' },
+    { k: 'docNoRep', name: 'Mak Bidan tukar orang', d: 'Tak boleh jaga orang yang sama 2 malam berturut.' },
+    { k: 'dukunSelf', name: 'Mak Dukun boleh selamatkan diri', d: 'Air Penawar boleh diguna kalau dia sendiri mangsa Harimau.' },
+    { k: 'loneWolf', name: 'Perisai Malam 1 Harimau Tunggal', d: 'Kalau cuma ada 1 Harimau, Tok Nujum nampak dia BAIK pada Malam 1.' },
+    { k: 'reveal', name: 'Dedah watak bila mati', d: 'Tunjuk watak pemain yang terkorban.' },
+    { k: 'neutral', name: 'Nama neutral', d: 'Guna "Tok Herba" sebagai ganti "Mak Dukun".' }
+  ];
+  const RN = (id) => (setup.rules.neutral && ROLES[id].alt) ? ROLES[id].alt : ROLES[id].n;
+  const RI = (id) => ROLES[id].i;
+  const RL = (id) => `${RI(id)} ${RN(id)}`;
+
+  /* ==================== STORAN ==================== */
+  let savedGroups = [];
+  const GROUP_KEY = 'ww_my_saved_groups_v2', PREF_KEY = 'jadian_prefs_v4';
+  function loadStorage() {
+    try { const raw = localStorage.getItem(GROUP_KEY); savedGroups = raw ? JSON.parse(raw) : []; } catch (e) { savedGroups = []; }
+    if (!Array.isArray(savedGroups)) savedGroups = [];
+    try {
+      const p = JSON.parse(localStorage.getItem(PREF_KEY) || 'null');
+      if (p) {
+        Object.assign(setup.rules, p.rules || {});
+        ['mode', 'preset', 'disc', 'vote', 'hold', 'voteMode'].forEach((k) => { if (p[k]) setup[k] = p[k]; });
+        if (typeof p.sound === 'boolean') soundOn = p.sound;
+      }
+    } catch (e) {}
+    if (!['santai', 'kecoh', 'ganas'].includes(setup.preset)) setup.preset = 'santai';
+    if (!['mod_digital', 'pass_play'].includes(setup.mode)) setup.mode = 'mod_digital';
+  }
+  function saveGroups() { try { localStorage.setItem(GROUP_KEY, JSON.stringify(savedGroups)); } catch (e) {} }
+  function savePrefs() {
+    try { localStorage.setItem(PREF_KEY, JSON.stringify({ rules: setup.rules, mode: setup.mode, preset: setup.preset, disc: setup.disc, vote: setup.vote, hold: setup.hold, voteMode: setup.voteMode, sound: soundOn })); } catch (e) {}
+  }
+
+  /* ==================== BUNYI, TOAST, MODAL, SHEET ==================== */
+  // AudioContext disediakan pada sentuhan pertama supaya bunyi pertama tak menyebabkan skrin tersekat.
+  function warmAudio() { if (soundOn && !actx) { try { actx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} } }
+  document.addEventListener('pointerdown', warmAudio, { once: true });
+  function beep(t) {
+    if (!soundOn) return;
+    try {
+      warmAudio(); if (!actx) return;
+      const seq = { click: [[480, .05]], morning: [[523, .12], [659, .12], [784, .2]], night: [[392, .16], [294, .28]],
+        win: [[523, .12], [659, .12], [784, .12], [1046, .32]], alarm: [[880, .14], [0, .08], [880, .14], [0, .08], [880, .26]] }[t] || [[480, .05]];
+      let at = actx.currentTime;
+      seq.forEach(([f, d]) => {
+        if (f) { const o = actx.createOscillator(), g = actx.createGain(); o.type = 'triangle'; o.frequency.setValueAtTime(f, at); g.gain.setValueAtTime(.09, at); g.gain.exponentialRampToValueAtTime(.001, at + d); o.connect(g); g.connect(actx.destination); o.start(at); o.stop(at + d); }
+        at += d;
+      });
+    } catch (e) {}
+  }
+  function toast(msg) {
+    const t = $('toast'); t.textContent = msg; t.hidden = false;
+    t.style.animation = 'none'; void t.offsetWidth; t.style.animation = '';
+    clearTimeout(toastT); toastT = setTimeout(() => { t.hidden = true; }, 2800);
+  }
+  function ask(o) {
+    $('mTitle').textContent = o.title; $('mBody').textContent = o.body;
+    const ok = $('mOk'); ok.textContent = o.ok || 'Ya'; ok.className = 'btn ' + (o.danger ? 'btn-merah' : 'btn-emas');
+    modalOk = o.onOk; $('modal').hidden = false; ok.focus();
+  }
+  window.modalClose = function (yes) { $('modal').hidden = true; const f = modalOk; modalOk = null; if (yes && f) f(); };
+  function openSheet(html) { $('sheetContent').innerHTML = html; $('sheet').hidden = false; }
+  window.closeSheet = function () { $('sheet').hidden = true; };
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    if (!$('modal').hidden) window.modalClose(false); else if (!$('sheet').hidden) window.closeSheet();
+  });
+
+  const SPEAKER_ON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg>';
+  const SPEAKER_OFF = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M17 9l5 6M22 9l-5 6"/></svg>';
+  window.toggleSound = function () { soundOn = !soundOn; savePrefs(); renderSoundUI(); beep('click'); };
+  function renderSoundUI() {
+    $('soundTop').innerHTML = soundOn ? SPEAKER_ON : SPEAKER_OFF;
+    $('soundTop').setAttribute('aria-label', soundOn ? 'Matikan bunyi' : 'Hidupkan bunyi');
+    $('rSound').checked = soundOn;
+  }
+
+  window.openRole = function (id) {
+    const r = ROLES[id];
+    openSheet(`<div class="kad" style="--c:${FC[r.f]}"><div class="songket"></div><div class="kad-body">
+        <span class="eyebrow">${FNAME[r.f]}</span><span class="big">${r.i}</span><span class="rn">${esc(RN(id))}</span><p>${r.d}</p></div></div>
+      <div class="facts">
+        <div class="fact"><small>Bangun malam</small><b>${r.wake ? (r.n1 ? 'Malam 1 sahaja' : r.pack ? 'Ya, bersama kawanan' : 'Ya') : 'Tidak'}</b></div>
+        <div class="fact"><small>Tok Nujum nampak</small><b style="color:${r.seer === 'bad' ? '#ff9b93' : 'var(--pandan)'}">${r.seer === 'bad' ? 'BAHAYA' : 'BAIK'}</b></div>
+        <div class="fact"><small>Menang bersama</small><b>${r.f === 'good' ? 'Kampung' : r.f === 'wolf' ? 'Pihak Harimau' : 'Sendiri'}</b></div>
+        <div class="fact"><small>Bilangan kad</small><b>${r.multi ? 'Boleh lebih 1' : '1 sahaja'}</b></div>
+      </div>
+      <button class="btn btn-ghost btn-block" onclick="window.closeSheet()">Tutup</button>`);
+  };
+  window.openHowTo = function () {
+    openSheet(`<div class="pagehead"><span class="eyebrow emas">Cara main</span><h1>Jadian dalam 1 minit</h1></div>
+      <ol class="howto">
+        <li><b>Agih watak.</b> Setiap orang dapat kad rahsia: Pasukan Kampung, Pihak Harimau, atau Solo.</li>
+        <li><b>Malam.</b> Semua tutup mata. Harimau Jadian bangun dan pilih mangsa. Watak berkuasa lain bangun ikut giliran.</li>
+        <li><b>Pagi.</b> App umum siapa terkorban dan peristiwa kampung hari itu.</li>
+        <li><b>Mahkamah Kampung.</b> Bermesyuarat, tuduh, beri peluang bela diri, kemudian undi siapa dihalau.</li>
+        <li><b>Menang.</b> Kampung menang bila semua Harimau, Musuh Dalam Selimut dan Pontianak tumpas. Pihak Harimau menang bila bilangan mereka menyamai yang lain. Watak solo dan pasangan bercinta ada syarat sendiri.</li>
+      </ol>
+      <div class="sub-h">Peraturan penting</div>
+      <ol class="howto">
+        <li><b>Turutan perlindungan malam:</b> Air Penawar → Mak Bidan → Peronda RT → kebal Pontianak → Abang Sado → gigitan Harimau Tua atau Kena Gigit → mati.</li>
+        <li><b>Toyol bertindak dulu.</b> Kuasa yang dicuri batal malam itu, tapi tuannya tetap dikira "keluar" oleh Mak Cik Bawang.</li>
+        <li><b>Mati merana.</b> Kalau seorang pasangan Mak Andam mati, pasangannya terus mati juga.</li>
+        <li><b>Seri dalam undian</b> bermaksud tiada siapa dihalau.</li>
+        <li><b>Watak bertukar</b> (Hantu Raya, Kena Gigit, Musuh Dalam Selimut, gigitan Harimau Tua) dimaklumkan secara rahsia pada malam berikutnya.</li>
+      </ol>
+      <button class="btn btn-emas btn-block" onclick="window.closeSheet()">Faham</button>`);
+  };
+
+  /* ==================== NAVIGASI ==================== */
+  window.go = function (pg) {
+    if (game) return;
+    ['home', 'players', 'roles', 'settings', 'game'].forEach((k) => { const el = $('pg_' + k); el.hidden = k !== pg; el.classList.toggle('enter', k === pg); });
+    document.querySelectorAll('.tab').forEach((t) => { if (t.dataset.pg === pg) t.setAttribute('aria-current', 'page'); else t.removeAttribute('aria-current'); });
+    $('tabbar').hidden = false; $('topbar').hidden = false;
+    $('topbar').classList.toggle('on-home', pg === 'home');
+    window.scrollTo(0, 0); renderSetup();
+  };
+  function showGameScreen() {
+    ['home', 'players', 'roles', 'settings'].forEach((k) => { $('pg_' + k).hidden = true; });
+    $('pg_game').hidden = false; $('tabbar').hidden = true; $('topbar').hidden = true; $('notesCard').hidden = true;
+    window.scrollTo(0, 0);
+  }
+  window.selectGameMode = function (m) { beep('click'); setup.mode = m; savePrefs(); if (setup.balMode === 'auto') autoBal(); renderSetup(); };
+
+  /* ==================== PEMAIN & SENARAI SIMPANAN ==================== */
+  function nextAva() { const used = new Set(setup.players.map((p) => p.ava)); return AVA.find((a) => !used.has(a)) || AVA[setup.players.length % AVA.length]; }
+  function rebalance() { setup.balMode === 'auto' ? autoBal() : syncKampung(); }
+  window.addPlayer = function () {
+    const inp = $('newPlayerInput'), name = inp.value.trim().replace(/\s+/g, ' ');
+    if (!name) { inp.focus(); return; }
+    if (setup.players.length >= 20) { toast('Maksimum 20 pemain.'); return; }
+    if (setup.players.some((p) => p.name.toLowerCase() === name.toLowerCase())) { toast(`Nama "${name}" dah ada dalam senarai.`); inp.select(); return; }
+    setup.players.push({ id: Date.now() + Math.floor(Math.random() * 1000), name, ava: nextAva() });
+    inp.value = ''; inp.focus(); beep('click'); rebalance(); renderSetup();
+  };
+  window.removePlayer = function (id) { setup.players = setup.players.filter((p) => p.id !== id); beep('click'); rebalance(); renderSetup(); };
+  window.clearAllPlayers = function () {
+    if (!setup.players.length) return;
+    ask({ title: 'Kosongkan senarai?', body: `Semua ${setup.players.length} nama dalam senarai semasa akan dibuang. Senarai tersimpan tak terjejas.`, ok: 'Kosongkan', danger: true,
+      onOk: () => { setup.players = []; rebalance(); renderSetup(); } });
+  };
+  window.toggleSaveForm = function () {
+    if (!setup.players.length) { toast('Tambah pemain dulu sebelum simpan.'); return; }
+    const box = $('saveFormBox'); box.hidden = !box.hidden; if (!box.hidden) $('saveGroupNameInput').focus();
+  };
+  window.saveCurrentToNewGroup = function () {
+    if (!setup.players.length) return;
+    const inp = $('saveGroupNameInput'), title = inp.value.trim() || ('Kumpulan ' + (savedGroups.length + 1));
+    savedGroups.unshift({ id: Date.now(), title, players: JSON.parse(JSON.stringify(setup.players)) });
+    saveGroups(); inp.value = ''; $('saveFormBox').hidden = true; beep('morning'); toast(`Disimpan sebagai "${title}".`); renderSetup();
+  };
+  window.loadGroupById = function (gid) {
+    const grp = savedGroups.find((g) => g.id === gid); if (!grp) return;
+    beep('morning'); setup.players = JSON.parse(JSON.stringify(grp.players)).slice(0, 20);
+    rebalance(); renderSetup(); toast(`"${grp.title}" dimuatkan: ${setup.players.length} pemain.`);
+  };
+  window.startRenameGroup = function (gid) { editingGroupId = gid; renderGroups(); const i = $('renameInp_' + gid); if (i) { i.focus(); i.select(); } };
+  window.confirmRenameGroup = function (gid) {
+    const inp = $('renameInp_' + gid), grp = savedGroups.find((g) => g.id === gid);
+    if (grp && inp && inp.value.trim()) { grp.title = inp.value.trim(); saveGroups(); }
+    editingGroupId = null; renderGroups();
+  };
+  window.overwriteGroupPlayers = function (gid) {
+    const grp = savedGroups.find((g) => g.id === gid); if (!grp || !setup.players.length) return;
+    ask({ title: `Kemaskini "${grp.title}"?`, body: `Ahli lama (${grp.players.length}) akan diganti dengan ${setup.players.length} pemain dalam senarai semasa.`, ok: 'Kemaskini',
+      onOk: () => { grp.players = JSON.parse(JSON.stringify(setup.players)); saveGroups(); renderGroups(); toast('Ahli dikemaskini.'); } });
+  };
+  window.deleteGroupById = function (gid) {
+    const grp = savedGroups.find((g) => g.id === gid); if (!grp) return;
+    ask({ title: `Padam "${grp.title}"?`, body: 'Senarai tersimpan ini akan dibuang dari peranti ini.', ok: 'Padam', danger: true,
+      onOk: () => { savedGroups = savedGroups.filter((g) => g.id !== gid); saveGroups(); renderSetup(); } });
+  };
+  function renderGroups() {
+    $('gCount').textContent = savedGroups.length;
+    const c = $('savedGroupsList');
+    if (!savedGroups.length) { c.innerHTML = `<div class="empty"><b>Belum ada senarai tersimpan</b>Tambah nama pemain, kemudian tekan "Simpan senarai ini".</div>`; return; }
+    c.innerHTML = savedGroups.map((g) => {
+      const editing = editingGroupId === g.id;
+      return `<div class="group">
+        ${editing ? `<form class="addrow" onsubmit="event.preventDefault(); window.confirmRenameGroup(${g.id});"><input id="renameInp_${g.id}" class="input" value="${esc(g.title)}" maxlength="30" /><button class="btn btn-pandan btn-sm" type="submit">Simpan</button></form>`
+          : `<div class="group-top"><span class="group-title">${esc(g.title)}</span><span class="tag">${g.players.length} pemain</span></div>`}
+        <div class="group-members">${g.players.map((p) => `${p.ava} ${esc(p.name)}`).join(' · ') || 'Tiada ahli'}</div>
+        <div class="btn-row">
+          <button class="btn btn-emas btn-sm" onclick="window.loadGroupById(${g.id})">Guna senarai</button>
+          ${editing ? '' : `<button class="btn btn-ghost btn-sm" onclick="window.startRenameGroup(${g.id})">Tukar nama</button>`}
+          ${setup.players.length ? `<button class="btn btn-ghost btn-sm" onclick="window.overwriteGroupPlayers(${g.id})">Kemaskini ahli</button>` : ''}
+          <button class="btn btn-ghost btn-sm" style="flex:0 0 auto;color:#ff9b93;" onclick="window.deleteGroupById(${g.id})" aria-label="Padam ${esc(g.title)}">Padam</button>
+        </div></div>`;
+    }).join('');
+  }
+
+  /* ==================== AUTO-BALANCE & MANUAL ==================== */
+  const specCount = (rc) => IDS.reduce((a, k) => (k === 'orang_kampung' ? a : a + (rc[k] || 0)), 0);
+  const scoreOf = (rc) => IDS.reduce((a, k) => a + (rc[k] || 0) * ROLES[k].w, 0);
+  // Setiap Orang Kampung tambah +1, jadi julat "seimbang" membesar sedikit ikut saiz kumpulan.
+  const balanceRange = (n) => ({ lo: -2, hi: 5 + Math.floor(n / 6) });
+  const PRESETS = {
+    santai: (n, rc) => { if (n >= 7) rc.cikgu = 1; if (n >= 9) rc.pemburu = 1; if (n >= 11) rc.peronda = 1; if (n >= 13) rc.anak_datuk = 1; if (n >= 15) rc.ketua = 1; },
+    kecoh: (n, rc) => { if (n >= 5) rc.si_luncai = 1; if (n >= 7) rc.mak_dukun = 1; if (n >= 8) rc.hantu_raya = 1; if (n >= 9) rc.pak_pandir = 1; if (n >= 10) rc.musuh = 1; if (n >= 11) rc.pendendam = 1; if (n >= 12) rc.mak_andam = 1; if (n >= 13) rc.mak_cik_bawang = 1; if (n >= 14) rc.pak_belalang = 1; if (n >= 16) rc.ketua = 1; },
+    ganas: (n, rc) => { if (n >= 5) rc.mak_dukun = 1; if (n >= 6) rc.pemburu = 1; if (n >= 8) rc.pontianak = 1; if (n >= 9) rc.anak_harimau = 1; if (n >= 10) rc.abang_sado = 1; if (n >= 12) rc.toyol = 1; if (n >= 13) rc.kena_gigit = 1; if (n >= 15) rc.harimau_tua = 1; if (n >= 16) rc.pelesit = 1; if (n >= 17) rc.peronda = 1; }
+  };
+  window.setBalanceMode = function (m) { beep('click'); setup.balMode = m; if (m === 'auto') autoBal(); renderSetup(); };
+  window.setAutoPreset = function (p) { beep('click'); setup.preset = p; savePrefs(); autoBal(); renderSetup(); };
+  function autoBal() {
+    const n = setup.players.length, rc = emptyRc();
+    if (n === 0) { setup.rc = rc; return; }
+    if (n < 4) { rc.harimau = 1; rc.orang_kampung = Math.max(0, n - 1); setup.rc = rc; return; }
+    rc.tok_nujum = 1; rc.mak_bidan = 1;
+    PRESETS[setup.preset](n, rc);
+    // Had kawanan kira-kira 1 untuk setiap 4 pemain, ikut panduan Ultimate Werewolf.
+    const pack = () => rc.harimau + rc.anak_harimau + rc.harimau_tua;
+    const maxPack = Math.max(1, Math.round(n / 4)), hi = balanceRange(n).hi;
+    // Minimum kawanan ~1 setiap 5 pemain, supaya kumpulan besar tak cuma ada seekor Harimau.
+    rc.harimau = Math.max(0, Math.max(1, Math.floor(n / 5)) - rc.anak_harimau - rc.harimau_tua);
+    if (pack() === 0) rc.harimau = 1;
+    rc.orang_kampung = n - specCount(rc);
+    while (scoreOf(rc) > hi && rc.orang_kampung > 0 && pack() < maxPack) { rc.harimau++; rc.orang_kampung = n - specCount(rc); }
+    // Kalau terlalu berat ke pihak Harimau, kurangkan Harimau biasa (kekalkan sekurang-kurangnya 1 ahli kawanan).
+    while (scoreOf(rc) < balanceRange(n).lo && rc.harimau > 0 && pack() > 1) { rc.harimau--; rc.orang_kampung = n - specCount(rc); }
+    rc.orang_kampung = Math.max(0, rc.orang_kampung);
+    setup.rc = rc;
+  }
+  function syncKampung() { const n = setup.players.length, spec = specCount(setup.rc); if (spec <= n) setup.rc.orang_kampung = n - spec; }
+  window.adjustRoleCount = function (rId, d) {
+    if (setup.balMode !== 'manual') return;
+    const next = (setup.rc[rId] || 0) + d; if (next < 0) return;
+    // Watak unik cuma 1 kad: dua Tok Nujum atau dua Mak Bidan akan bangun serentak dan kenal sesama sendiri.
+    if (d > 0 && next > 1 && !ROLES[rId].multi) { toast(`${RN(rId)} cuma boleh ada 1 dalam dek.`); return; }
+    beep('click'); setup.rc[rId] = next; if (rId !== 'orang_kampung') syncKampung(); renderSetup();
+  };
+  window.toggleRule = function (k, v) { setup.rules[k] = v; savePrefs(); renderSetup(); };
+  window.setPref = function (k, v) { setup[k] = v; savePrefs(); };
+
+  function readiness() {
+    const n = setup.players.length, rc = setup.rc;
+    const tot = IDS.reduce((a, k) => a + rc[k], 0);
+    const sum = (f) => IDS.filter((k) => ROLES[k].f === f).reduce((a, k) => a + rc[k], 0);
+    const killers = rc.harimau + rc.anak_harimau + rc.harimau_tua + rc.pontianak;
+    return { n, tot, good: sum('good'), wolf: sum('wolf'), solo: sum('solo'), killers, score: scoreOf(rc), ok: tot === n && killers >= 1 && n >= 4 };
+  }
+  function verdict(r) {
+    if (r.n === 0) return { cls: '', txt: 'Tiada pemain' };
+    const b = balanceRange(r.n), s = r.score > 0 ? '+' + r.score : String(r.score);
+    if (r.score < b.lo) return { cls: 'wolf', txt: `Berat Harimau (${s})` };
+    if (r.score > b.hi) return { cls: 'warn', txt: `Berat Kampung (${s})` };
+    return { cls: 'good', txt: `Seimbang (${s})` };
+  }
+
+  function renderSetup() {
+    const r = readiness(), v = verdict(r), rc = setup.rc;
+    $('tabCount').hidden = r.n === 0; $('tabCount').textContent = r.n;
+    $('tabPlay').disabled = !r.ok;
+
+    // ---- Utama
+    const presetName = setup.balMode === 'manual' ? 'Manual Bebas' : { santai: 'Santai', kecoh: 'Kecoh', ganas: 'Ganas' }[setup.preset];
+    const row = (ok, ic, label, desc, pg) => `<button class="srow" onclick="window.go('${pg}')"><span class="ic" style="--c:${ok ? 'var(--pandan)' : 'var(--merah)'}">${ic}</span>
+      <span><b>${label}</b><small>${desc}</small></span><span class="chev">›</span></button>`;
+    const roleOk = r.n >= 4 && r.tot === r.n && r.killers >= 1;
+    $('setupRows').innerHTML =
+      row(r.n >= 4, '👥', 'Pemain', r.n >= 4 ? `${r.n} orang sedia main` : r.n ? `${r.n} orang. Perlu sekurang-kurangnya 4.` : 'Belum ada pemain', 'players') +
+      row(roleOk, '🃏', 'Watak', r.n < 4 ? 'Tambah pemain dulu' : r.tot !== r.n ? `${r.tot} kad untuk ${r.n} pemain. Belum sepadan.` : r.killers < 1 ? 'Belum ada pembunuh' : `${presetName} · ${v.txt}`, 'roles') +
+      row(true, '⚙️', 'Tetapan', `${setup.voteMode === 'mahkamah' ? 'Mahkamah Kampung' : 'Undian Pantas'} · mesyuarat ${setup.disc === 'auto' ? 'auto' : Math.round(setup.disc / 60) + ' minit'}`, 'settings');
+    const mode = MODES.find((m) => m.id === setup.mode);
+    $('modeTag').textContent = mode.name;
+    $('modeList').innerHTML = MODES.map((m) => `<button class="mode" aria-pressed="${m.id === setup.mode}" onclick="window.selectGameMode('${m.id}')"><span class="ic">${m.ic}</span><b>${m.name}</b></button>`).join('');
+    $('modeDesc').textContent = mode.d;
+    const deck = IDS.filter((k) => rc[k] > 0);
+    $('homeDeck').innerHTML = deck.length
+      ? deck.map((k) => `<span class="tag ${ROLES[k].f === 'good' ? 'good' : ROLES[k].f === 'wolf' ? 'wolf' : 'solo'}">${RL(k)} × ${rc[k]}</span>`).join('')
+      : `<span class="muted small">Dek kosong. Tambah pemain dulu.</span>`;
+    $('homeStart').disabled = !r.ok;
+    $('homeStart').textContent = r.ok ? `Mula Malam Pertama · ${r.n} pemain` : 'Lengkapkan persediaan dulu';
+
+    // ---- Pemain
+    $('pCount').textContent = r.n + ' pemain';
+    $('pCount').className = 'tag ' + (r.n >= 4 ? 'good' : r.n > 0 ? 'warn' : '');
+    $('playerList').innerHTML = r.n === 0
+      ? `<div class="empty"><b>Kampung masih sunyi</b>Taip nama di atas, atau guna senarai tersimpan di bawah.</div>`
+      : `<div class="plist">${setup.players.map((p, i) => `<div class="prow"><span class="ava">${p.ava}</span><span class="num">${i + 1}</span><span class="nm">${esc(p.name)}</span>
+          <button class="x" onclick="window.removePlayer(${p.id})" aria-label="Buang ${esc(p.name)}">✕</button></div>`).join('')}</div>`;
+    $('playerTools').hidden = r.n === 0; if (r.n === 0) $('saveFormBox').hidden = true;
+    renderGroups();
+
+    // ---- Watak
+    const isMan = setup.balMode === 'manual';
+    $('tabAuto').setAttribute('aria-pressed', !isMan); $('tabManual').setAttribute('aria-pressed', isMan);
+    $('presetBar').hidden = isMan;
+    ['santai', 'kecoh', 'ganas'].forEach((k) => $('pb_' + k).setAttribute('aria-pressed', k === setup.preset));
+    $('totLbl').textContent = `${r.tot} / ${r.n} kad`; $('totLbl').style.color = r.tot === r.n ? '' : '#ff9b93';
+    $('scoreLbl').className = 'tag ' + v.cls; $('scoreLbl').textContent = v.txt;
+    const den = Math.max(1, r.tot);
+    $('mGood').style.width = (r.good / den * 100) + '%'; $('mSolo').style.width = (r.solo / den * 100) + '%'; $('mBad').style.width = (r.wolf / den * 100) + '%';
+    $('goodLbl').textContent = `Kampung ${r.good}`; $('badLbl').textContent = `Harimau ${r.wolf}`; $('soloLbl').textContent = `Solo ${r.solo}`;
+    $('roleList').innerHTML = FACTIONS.map((fa) => `<div class="rgroup" style="--c:${fa.c}"><div class="rgroup-h">${fa.name}</div>
+      ${IDS.filter((k) => ROLES[k].f === fa.f).map((k) => {
+        const c = rc[k] || 0, ro = ROLES[k];
+        return `<div class="role ${c > 0 ? 'on' : ''}">
+          <button class="role-info" onclick="window.openRole('${k}')"><span class="ic">${ro.i}</span><span class="txt"><b>${esc(RN(k))}</b><small>${ro.s}</small></span></button>
+          <span class="stepper">
+            <button ${!isMan || c <= 0 ? 'disabled' : ''} onclick="window.adjustRoleCount('${k}',-1)" aria-label="Kurang ${esc(RN(k))}">−</button>
+            <span>${c}</span>
+            <button ${!isMan || (c >= 1 && !ro.multi) ? 'disabled' : ''} onclick="window.adjustRoleCount('${k}',1)" aria-label="Tambah ${esc(RN(k))}">+</button>
+          </span></div>`;
+      }).join('')}</div>`).join('') + (isMan ? '' : `<p class="muted small" style="margin:0">Butang + dan − dikunci dalam Auto-Balance. Tukar ke Manual Bebas untuk susun sendiri.</p>`);
+    const diags = [];
+    if (r.n < 4) diags.push(['warn', 'Tambah sekurang-kurangnya 4 pemain untuk mula.']);
+    else {
+      if (r.tot !== r.n) diags.push(['bad', `Jumlah kad (${r.tot}) tak sama dengan jumlah pemain (${r.n}).`]);
+      if (r.killers === 0) diags.push(['bad', 'Pilih sekurang-kurangnya 1 pembunuh: Harimau Jadian, Anak Harimau, Harimau Tua atau Pontianak.']);
+      if (rc.musuh > 0 && rc.harimau + rc.anak_harimau + rc.harimau_tua === 0) diags.push(['warn', 'Musuh Dalam Selimut tanpa Harimau akan terus jadi Harimau pada malam pertama.']);
+      if (rc.mak_bidan === 0 && rc.mak_dukun === 0 && rc.peronda === 0) diags.push(['warn', 'Tiada pelindung malam (Mak Bidan, Mak Dukun atau Peronda RT).']);
+      if ((rc.mak_dukun || rc.mak_cik_bawang || rc.toyol) && setup.mode === 'pass_play') diags.push(['warn', 'Pass & Play akan tambah Pusingan Subuh selepas setiap malam, untuk Mak Dukun, Mak Cik Bawang atau Toyol.']);
+      if (!diags.length) diags.push(['good', 'Susunan watak lengkap dan sedia dimainkan.']);
+    }
+    $('diagBox').innerHTML = diags.map(([t, m]) => `<div class="note ${t}">${m}</div>`).join('');
+
+    // ---- Tetapan
+    const sw = (x) => `<div class="set-row"><div><b>${x.name}</b><small>${x.d}</small></div>
+      <label class="switch"><input type="checkbox" ${setup.rules[x.k] ? 'checked' : ''} onchange="window.toggleRule('${x.k}', this.checked)" aria-label="${x.name}" /><span class="track"></span></label></div>`;
+    $('featuresBox').innerHTML = FEATURES.map(sw).join('');
+    $('rulesBox').innerHTML = RULES.map(sw).join('');
+    $('selDiscuss').value = setup.disc; $('selVote').value = setup.vote; $('selHold').value = setup.hold; $('selVoteMode').value = setup.voteMode;
+    renderSoundUI();
+  }
+
+  /* ==================== ENJIN PERMAINAN ==================== */
+  function resetTemps() { tempTargetId = null; tempTargets = []; tempDukun = { save: null, poison: null }; tempBite = false; tempQR = false; seerDone = false; }
+  const gp = (id) => game.players.find((p) => p.id === id);
+  const alive = () => game.players.filter((p) => p.alive);
+  const has = (r) => game.players.some((p) => p.alive && p.role === r);
+  const holder = (r) => alive().find((p) => p.role === r);
+  const dispRole = (p) => (p.role === 'pak_belalang' ? 'tok_nujum' : p.role);
+  const deckHas = (r) => (game.rc[r] || 0) > 0;
+  const nightEv = () => game.nightEvent;
+
+  function setRole(p, id) {
+    p.role = id;
+    if (id === 'mak_dukun' && !p.potions) p.potions = { penawar: true, racun: true };
+  }
+  function addNotice(p, n) { p.notices = p.notices || []; p.notices.push(n); }
+  function assignTargets() { game.players.filter((p) => p.alive && p.role === 'pendendam' && !p.target).forEach(pickTarget); }
+  function pickTarget(p) {
+    let pool = game.players.filter((x) => x.alive && x.id !== p.id && ROLES[x.role].f === 'good');
+    if (!pool.length) pool = game.players.filter((x) => x.alive && x.id !== p.id);
+    p.target = pool.length ? pool[Math.floor(Math.random() * pool.length)].id : null;
+  }
+
+  window.startGame = function () {
+    const r = readiness();
+    if (!r.ok) {
+      if (r.n < 4) { toast('Perlu sekurang-kurangnya 4 pemain.'); window.go('players'); }
+      else { toast('Susunan kad belum lengkap.'); window.go('roles'); }
+      return;
+    }
+    beep('night');
+    const deck = [];
+    IDS.forEach((k) => { for (let i = 0; i < setup.rc[k]; i++) deck.push(k); });
+    for (let i = deck.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [deck[i], deck[j]] = [deck[j], deck[i]]; }
+    const rc = { ...setup.rc };
+    const CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    game = {
+      mode: setup.mode, rc, rules: { ...setup.rules }, voteMode: setup.voteMode,
+      code: Array.from({ length: 4 }, () => CODE_CHARS[Math.floor(Math.random() * CODE_CHARS.length)]).join(''),
+      dealt: {}, dealView: null,
+      discTime: setup.disc, voteTime: parseInt(setup.vote, 10), holdSec: parseInt(setup.hold, 10) || 0,
+      night: 1, phase: setup.mode === 'mod_digital' ? 'deal' : 'night',
+      players: setup.players.map((p) => ({ id: p.id, name: p.name, ava: p.ava, role: null, orig: null, alive: true, muted: false, idol: null, notices: [], target: null, sadoUsed: false, datukUsed: false, biteUsed: false, ghostUsed: false, revealed: false })),
+      packAtStart: 0, lastDoc: null, lastMute: null, actions: {}, steps: [], stepIdx: 0, lovers: null,
+      pp: { round: 'malam', idx: 0, open: false },
+      needSubuh: rc.mak_dukun > 0 || rc.mak_cik_bawang > 0 || rc.toyol > 0, delayInfo: rc.toyol > 0,
+      hunters: [], hunterNext: null, logs: [], winner: null, summary: null, verdict: null, cubRevenge: false,
+      event: null, nightEvent: null, radar: null, court: null, _dead: []
+    };
+    game.players.forEach((p) => { setRole(p, deck.pop()); p.orig = p.role; });
+    afterRolesKnown();
+    history = []; resetTemps(); showGameScreen();
+    if (game.phase === 'night') initNight(); else renderStage();
+  };
+  function afterRolesKnown() { game.packAtStart = game.players.filter(isPack).length; assignTargets(); convertTraitors(); }
+
+  function snap() { history.push(JSON.stringify(game)); if (history.length > 30) history.shift(); }
+  const undoAllowed = () => game && history.length > 0 && !(game.mode === 'pass_play' && game.phase === 'night');
+  window.undoLastStep = function () {
+    if (!undoAllowed()) return;
+    beep('click'); clearInterval(timerInt);
+    game = JSON.parse(history.pop()); resetTemps();
+    if (game.phase === 'vote') { remSec = timerTotal = game.voteTime; renderStage(); startTimer(); return; }
+    if (game.phase === 'defense') { remSec = timerTotal = game.voteTime; renderStage(); startTimer(); return; }
+    renderStage();
+  };
+  window.toggleNotes = function () { $('notesCard').hidden = !$('notesCard').hidden; };
+  window.exitGame = function () {
+    const leave = () => { clearInterval(timerInt); clearInterval(minInt); window.holdEnd(); game = null; history = []; resetTemps(); document.body.classList.remove('day'); window.go('home'); };
+    if (!game || game.phase === 'over') { leave(); return; }
+    ask({ title: 'Tamatkan permainan?', body: 'Permainan yang sedang berjalan akan hilang. Senarai pemain dan tetapan kekal.', ok: 'Tamatkan', danger: true, onOk: leave });
+  };
+  window.playAgain = function () { clearInterval(timerInt); game = null; window.startGame(); };
+  window.startNightPhase = function () { snap(); initNight(); };
+
+  function initNight() {
+    clearInterval(timerInt);
+    game.phase = 'night';
+    game.nightEvent = game.event ? game.event.id : null;
+    game.actions = { wolf: [], wolfBy: null, convert: false, convertBy: null, doc: null, docBy: null, guard: null, guardBy: null, sk: null, skBy: null,
+      mute: null, muteBy: null, save: null, poison: null, dukunBy: null, block: null, info: {}, res: {} };
+    game.wolfCount = (game.cubRevenge ? 2 : 1) + (game.nightEvent === 'purnama' ? 1 : 0);
+    game.radar = { s: {}, t: {} };
+    game.players.forEach((p) => { p.muted = false; });
+    resetTemps();
+    if (game.mode === 'pass_play') game.pp = { round: 'malam', idx: 0, open: false };
+    else { game.steps = buildSteps(); game.stepIdx = 0; }
+    if (game.night > 1) beep('night');
+    renderStage();
+  }
+
+  /* ---------- Turutan malam (mod moderator) ---------- */
+  function buildSteps() {
+    const s = [], n = game.night;
+    game.players.forEach((p) => { if (p.alive && p.notices && p.notices.length) s.push({ t: 'notice', pId: p.id }); });
+    if (n === 1 && has('mak_andam')) { s.push({ t: 'mak_andam' }); s.push({ t: 'lovers' }); }
+    if (n === 1 && has('hantu_raya')) s.push({ t: 'hantu_raya' });
+    // Watak yang dah mati tetap "dipanggil" (kalau tetapan hidup) supaya bunyi skrip tak dedahkan siapa yang dah tiada.
+    const step = (r) => { if (has(r)) s.push({ t: r }); else if (game.rules.callDead && deckHas(r)) s.push({ t: r, dead: true }); };
+    ['toyol', 'mak_bidan', 'peronda'].forEach(step);
+    if (alive().some(isPack)) s.push({ t: 'harimau' });
+    ['mak_dukun', 'pontianak', 'pelesit', 'tok_nujum', 'pak_belalang', 'cikgu', 'mak_cik_bawang'].forEach(step);
+    return s;
+  }
+  const SAY = {
+    mak_andam: 'Mak Andam, buka mata. Tunjuk 2 orang untuk dijodohkan.',
+    hantu_raya: 'Hantu Raya, buka mata. Tunjuk seorang tuan. Bila tuan mati, kau ambil alih wataknya.',
+    toyol: 'Toyol, buka mata. Kuasa siapa nak dicuri malam ni?',
+    mak_bidan: 'Mak Bidan, buka mata. Siapa nak dijaga malam ni?',
+    peronda: 'Peronda RT, buka mata. Rumah siapa nak dikawal malam ni?',
+    harimau: 'Harimau Jadian, buka mata. Kenal kawan kau. Rumah siapa nak diserbu malam ni?',
+    mak_dukun: 'Mak Dukun, buka mata. Ini mangsa malam ni. Nak guna Air Penawar? Ada sesiapa nak diberi Racun?',
+    pontianak: 'Pontianak, buka mata. Siapa mangsa kau malam ni?',
+    pelesit: 'Pelesit, buka mata. Tunjuk seorang untuk diintai.',
+    tok_nujum: 'Tok Nujum, buka mata. Tunjuk seorang untuk ditilik.',
+    pak_belalang: 'Tok Nujum, buka mata. Tunjuk seorang untuk ditilik.',
+    cikgu: 'Cikgu Disiplin, buka mata. Siapa kena denda diam esok?',
+    mak_cik_bawang: 'Mak Cik Bawang, buka mata. Rumah siapa nak diintai malam ni?'
+  };
+  const TONE = { harimau: 'bad', pontianak: 'bad', toyol: 'bad', mak_bidan: 'good', peronda: 'good', mak_andam: 'good' };
+
+  // Sekatan sasaran dikongsi oleh mod moderator dan Pass & Play. Pulangkan sebab, atau null kalau boleh dipilih.
+  function blockReason(kind, p, actor) {
+    switch (kind) {
+      case 'hantu_raya': case 'peronda': case 'pontianak': case 'tok_nujum': case 'pak_belalang': case 'toyol': case 'pelesit': case 'mak_cik_bawang':
+        return (actor ? p.id === actor.id : p.role === kind) ? 'Diri sendiri' : null;
+      case 'mak_bidan':
+        if (!game.rules.docSelf && (actor ? p.id === actor.id : p.role === 'mak_bidan')) return 'Tak boleh diri sendiri';
+        if (game.rules.docNoRep && p.id === game.lastDoc) return 'Dijaga semalam';
+        return null;
+      case 'harimau': return isPack(p) ? 'Kawan kawanan' : null;
+      case 'cikgu': return p.id === game.lastMute ? 'Didenda semalam' : null;
+      case 'racun': return (actor ? p.id === actor.id : p.role === 'mak_dukun') ? 'Diri sendiri' : null;
+      case 'dummy': return actor && p.id === actor.id ? 'Diri sendiri' : null;
+      default: return null;
+    }
+  }
+  function seerCheck(t) {
+    if (isPack(t) && game.packAtStart === 1 && game.night === 1 && game.rules.loneWolf) return { ok: true, txt: 'BAIK 👍' };
+    return ROLES[t.role].seer === 'bad' ? { ok: false, txt: 'BAHAYA 👎' } : { ok: true, txt: 'BAIK 👍' };
+  }
+  // Keputusan kuasa maklumat: Tok Nujum, Pak Belalang, Pelesit, Mak Cik Bawang. Mengambil kira Toyol dan Blackout.
+  function infoResult(kind, actorId, targetId) {
+    const a = game.actions, t = gp(targetId);
+    if (!t) return null;
+    if (nightEv() === 'blackout') return { cls: 'warn', txt: '🔌 Blackout. Gelap gelita, tiada apa yang nampak.' };
+    if (actorId && a.block === actorId) return { cls: 'warn', txt: '🧌 Kuasa kau dicuri Toyol malam ni. Tiada keputusan.' };
+    if (kind === 'tok_nujum') { const r = seerCheck(t); return { cls: r.ok ? 'good' : 'bad', txt: `${esc(t.name)}: ${r.txt}` }; }
+    if (kind === 'pak_belalang') {
+      a.res[actorId] = a.res[actorId] || (Math.random() < .5 ? 'BAIK 👍' : 'BAHAYA 👎');
+      return { cls: a.res[actorId].startsWith('BAIK') ? 'good' : 'bad', txt: `${esc(t.name)}: ${a.res[actorId]}` };
+    }
+    if (kind === 'pelesit') {
+      const txt = t.role === 'tok_nujum' ? `${esc(t.name)} ialah ${RL('tok_nujum')}!` : t.role === 'mak_dukun' ? `${esc(t.name)} ialah ${RL('mak_dukun')}!` : `${esc(t.name)} bukan Tok Nujum atau ${esc(RN('mak_dukun'))}.`;
+      return { cls: 'wolf', txt };
+    }
+    if (kind === 'mak_cik_bawang') {
+      return wokeTonight(t) ? { cls: 'bad', txt: `👀 ${esc(t.name)} keluar rumah malam tadi!` } : { cls: 'good', txt: `🏠 ${esc(t.name)} duduk diam di rumah malam tadi.` };
+    }
+    return null;
+  }
+  // "Keluar rumah" = watak itu bangun waktu malam ini, tak kira pilihannya atau kuasanya dicuri.
+  // Ikut watak, bukan ikut tindakan, supaya keputusan sama dalam mod Moderator dan Pass & Play.
+  function wokeTonight(p) {
+    const r = p.role, n = game.night;
+    if (ROLES[r].pack) return nightEv() !== 'kenduri';
+    if (r === 'mak_andam' || r === 'hantu_raya') return n === 1;
+    return ['toyol', 'mak_bidan', 'peronda', 'mak_dukun', 'pontianak', 'pelesit', 'tok_nujum', 'pak_belalang', 'cikgu', 'mak_cik_bawang'].includes(r);
+  }
+  // Ayat makluman watak bertukar. Dipakai di telefon moderator dan di kad QR (yang tiada akses kepada data permainan).
+  function noticeLine(nt, roleId) {
+    if (nt.kind === 'hantu') return `👥 Tuan kau (${esc(nt.from)}) dah mati. Kau kini <b>${RL(roleId)}</b> dan main untuk pihak itu.`;
+    if (nt.kind === 'musuh') return `🛏️ Semua Harimau dah tumpas. Kau kini <b>${RL('harimau')}</b>! Mulai malam ni kau bangun dan pilih mangsa.`;
+    if (nt.kind === 'luncai') return `🎯 Sasaran kau mati bukan kerana undian. Kau kini <b>${RL('si_luncai')}</b>. Menang kalau kau diundi keluar.`;
+    if (nt.kind === 'lover') return `💐 Mak Andam jodohkan kau dengan <b>${esc(nt.withName)}</b>. Kalau seorang mati, seorang lagi mati merana.`;
+    if (nt.kind === 'gigit') return `🐅 Kau digigit Harimau Tua. Kau kini <b>${RL('harimau')}</b> dan sertai kawanan.`;
+    if (nt.kind === 'kenagigit') return `🩹 Kau diserbu Harimau, tapi tak mati. Kau kini <b>${RL('harimau')}</b> dan sertai kawanan.`;
+    return '';
+  }
+  function noticeHTML(p) { return (p.notices || []).map((nt) => noticeLine(nt, dispRole(p))).join('<br>'); }
+  function rec(kind, by, t) {
+    const a = game.actions;
+    if (kind === 'toyol') a.block = t;
+    else if (kind === 'mak_bidan') { a.doc = t; a.docBy = by; }
+    else if (kind === 'peronda') { a.guard = t; a.guardBy = by; }
+    else if (kind === 'pontianak') { a.sk = t; a.skBy = by; }
+    else if (kind === 'cikgu') { a.mute = t; a.muteBy = by; }
+    else if (INFO.includes(kind)) a.info[by] = { kind, t };
+    else if (kind === 'hantu_raya') { const hr = gp(by), tp = gp(t); if (hr && tp) { hr.idol = t; game.logs.push(`Malam 1: ${esc(RN('hantu_raya'))} (${esc(hr.name)}) memilih ${esc(tp.name)} sebagai tuan.`); } }
+  }
+  function setLovers(ids) {
+    if (!ids || ids.length !== 2) return;
+    game.lovers = ids.slice();
+    const [x, y] = ids.map(gp);
+    game.logs.push(`Malam 1: Mak Andam menjodohkan ${esc(x.name)} dengan ${esc(y.name)}.`);
+    if (game.mode === 'pass_play') { addNotice(x, { kind: 'lover', withName: y.name }); addNotice(y, { kind: 'lover', withName: x.name }); }
+  }
+
+  function setProgress(done, total, label) {
+    const el = $('gProgress'); el.hidden = false;
+    el.innerHTML = `<div class="steps">${Array.from({ length: total }, (_, i) => `<i class="${i < done ? 'done' : i === done ? 'now' : ''}"></i>`).join('')}</div><small>${label}</small>`;
+  }
+  function applyTheme() {
+    const day = game && (['morning', 'discuss', 'vote', 'accuse', 'defense', 'tally', 'verdict', 'over'].includes(game.phase) || (game.phase === 'hunter' && game.hunterNext === 'vote'));
+    document.body.classList.toggle('day', !!day);
+  }
+  const tcard = (p, o) => `<button class="tcard ${o.sel ? (o.tone === 'bad' ? 'sel-bad' : o.tone === 'good' ? 'sel-good' : 'sel') : ''}" ${o.dis ? 'disabled' : ''} onclick="${o.on}(${p.id})">
+      <span class="ava">${p.ava}</span><b>${esc(p.name)}</b>${o.sub ? `<small>${o.sub}</small>` : ''}</button>`;
+  // Kad hanya "terbalik" sekali, iaitu sejurus selepas skrin dibuka, bukan setiap kali pemain ketik pilihan.
+  function kadHTML(p, extra, roleId) {
+    const rid = roleId || p.role, r = ROLES[rid], anim = flipNext; flipNext = false;
+    return `<div class="kad ${anim ? 'anim' : ''}" style="--c:${FC[r.f]}"><div class="songket"></div><div class="kad-body">
+      <span class="eyebrow">Watak rahsia ${esc(p.name)} · ${FNAME[r.f]}</span><span class="big">${r.i}</span><span class="rn">${esc(RN(rid))}</span><p>${r.d}</p>${extra || ''}</div></div>`;
+  }
+  const eventHTML = (id) => { const e = EVENTS[id]; return `<div class="event"><span class="ic">${e.i}</span><div><span class="eyebrow emas">Peristiwa kampung</span><b>${e.n}</b><small>${e.d}</small></div></div>`; };
+
+  function renderNotes() {
+    const hide = game.mode === 'pass_play' && game.phase !== 'over';
+    $('noteList').innerHTML = (hide ? `<div class="note warn">Pass & Play: watak disembunyikan supaya tak bocor. Cuma status hidup atau mati ditunjuk.</div>` : '') +
+      game.players.map((p) => {
+        const label = p.role ? RL(p.role) : '❓ Belum di-tag';
+        const extra = [p.orig && p.orig !== p.role ? `asal ${RN(p.orig)}` : '', p.role === 'pendendam' && p.target ? `sasaran ${esc(gp(p.target).name)}` : '',
+          p.potions && p.role === 'mak_dukun' ? `${p.potions.penawar ? '💧' : ''}${p.potions.racun ? '☠️' : ''}` : '', game.lovers && game.lovers.includes(p.id) ? '💞' : '', p.revealed ? 'didedah' : ''].filter(Boolean).join(', ');
+        const st = p.alive ? 'Hidup' : 'Mati';
+        return `<div class="lrow ${p.alive ? '' : 'dead'}"><span>${p.ava} <b>${esc(p.name)}</b>${p.muted ? ' 📏' : ''}</span><span>${hide ? st : `${label}${extra ? ` <span class="muted">(${extra})</span>` : ''} · ${st}`}</span></div>`;
+      }).join('');
+  }
+
+  function renderStage() {
+    if (!game) return;
+    applyTheme();
+    $('undoBtn').disabled = !undoAllowed();
+    $('gProgress').hidden = true;
+    renderNotes();
+    const E = $('gEyebrow'), T = $('gTitle'), box = $('stage');
+    const P = game.phase;
+
+    if (P === 'deal') { E.textContent = `Sebelum Malam 1 · Kod ${game.code}`; T.textContent = 'Agih Kad'; renderDeal(box); return; }
+    if (P === 'night') {
+      E.textContent = `Malam ${game.night}`;
+      if (game.mode === 'pass_play') { T.textContent = game.pp.round === 'subuh' ? 'Pusingan Subuh' : 'Giliran Rahsia'; renderPPNight(box); }
+      else { T.textContent = 'Skrip Moderator'; renderModNight(box); }
+      return;
+    }
+    if (P === 'hunter') {
+      E.textContent = 'Pemburu'; T.textContent = 'Tembakan Terakhir';
+      const h = gp(game.hunters[0]);
+      box.innerHTML = `<div class="script"><span class="eyebrow emas">🏹 ${esc(h.name)} terkorban</span><p class="say">Pemburu boleh tembak 1 pemain untuk dibawa mati bersama, atau pilih untuk tak tembak.</p></div>
+        <div class="tgrid">${alive().map((p) => tcard(p, { sel: tempTargetId === p.id, tone: 'bad', on: 'window.selectTarget' })).join('')}</div>
+        <div class="btn-row"><button class="btn btn-ghost" onclick="window.confirmHunterShot(true)">Tak tembak</button><button class="btn btn-merah" ${!tempTargetId ? 'disabled' : ''} onclick="window.confirmHunterShot(false)">Tembak</button></div>`;
+      return;
+    }
+    if (P === 'morning') {
+      E.textContent = `Pagi Hari ${game.night}`; T.textContent = 'Kukuruyuk!';
+      const s = game.summary;
+      box.innerHTML = `<div class="script"><span class="eyebrow emas">Laporan pagi</span><p class="say">${s.dead.length === 0 ? 'Malam tadi aman. Tiada siapa terkorban.' : `${s.dead.length} orang kampung terkorban malam tadi.`}</p></div>
+        ${s.dead.length ? `<div class="list">${s.dead.map((id) => { const p = gp(id); return `<div class="lrow"><span>${p.cause === 'merana' ? '💔' : '🪦'} <b>${esc(p.name)}</b></span><span>${game.rules.reveal ? RL(p.role) : 'Watak dirahsiakan'}</span></div>`; }).join('')}</div>` : ''}
+        ${s.muted ? `<div class="note warn center">📏 <b>${esc(gp(s.muted).name)}</b> didenda Cikgu Disiplin: tak boleh bercakap hari ini.</div>` : ''}
+        ${game.event ? eventHTML(game.event.id) : ''}
+        ${radarHTML()}
+        <button class="btn btn-emas btn-block" onclick="window.startDayDiscussion()">Mula mesyuarat di balai raya</button>`;
+      return;
+    }
+    if (P === 'discuss') {
+      E.textContent = `Siang ${game.night}`; T.textContent = 'Mesyuarat Kampung';
+      const mp = game.players.find((p) => p.alive && p.muted), ev = game.event && game.event.id;
+      const nextBtn = ev === 'banjir'
+        ? `<button class="btn btn-emas btn-block" onclick="window.skipVoteFlood()">🌊 Banjir Kilat: tiada undian, terus ke malam</button>`
+        : `<button class="btn btn-merah btn-block" onclick="window.startDayVoting()">${game.voteMode === 'mahkamah' ? 'Ke Mahkamah Kampung' : 'Terus ke undian'}</button>`;
+      box.innerHTML = `${mp ? `<div class="note bad center">📏 Didenda, tak boleh bercakap: <b>${mp.ava} ${esc(mp.name)}</b></div>` : ''}
+        ${ev ? `<div class="chips"><span class="tag warn">${EVENTS[ev].i} ${EVENTS[ev].n}</span></div>` : ''}
+        ${ringHTML(false)}
+        <p class="hint" style="text-align:center;">${alive().length} orang masih hidup. Bincang, tuduh, pertahankan diri.</p>
+        <div class="btn-row" style="justify-content:center;">
+          <button class="btn btn-ghost btn-sm" style="flex:0 0 auto" onclick="window.adjustTimerSeconds(-30)">−30 saat</button>
+          <button class="btn btn-ghost btn-sm" style="flex:0 0 auto" onclick="window.adjustTimerSeconds(60)">+1 minit</button>
+          ${ketuaBtn()}
+        </div>
+        ${nextBtn}`;
+      updateTimerUI(); return;
+    }
+    if (P === 'vote') {
+      E.textContent = `Undian ${game.night}`; T.textContent = 'Siapa Nak Dihalau?';
+      const k = revealedKetua();
+      box.innerHTML = `<div class="script"><p class="say">Pilih pemain yang dapat undian terbanyak.</p><p class="hint">Kalau seri, tekan Seri / Skip.${k ? ` Undi Ketua Kampung (${esc(k.name)}) dikira 2.` : ''}</p></div>
+        ${ringHTML(true)}
+        <div class="tgrid">${alive().map((p) => tcard(p, { sel: tempTargetId === p.id, tone: 'bad', on: 'window.selectTarget', sub: p.muted ? '📏 Didenda' : (p.revealed ? RL(p.role) : '') })).join('')}</div>
+        <div class="btn-row"><button class="btn btn-ghost" onclick="window.executeVote(null)">Seri / Skip</button><button class="btn btn-merah" ${!tempTargetId ? 'disabled' : ''} onclick="window.executeVote(${tempTargetId || 'null'})">Halau</button></div>`;
+      updateTimerUI(); return;
+    }
+    if (P === 'accuse' || P === 'defense' || P === 'tally') { renderCourt(box, E, T); return; }
+    if (P === 'verdict') {
+      E.textContent = `Siang ${game.night}`; T.textContent = 'Keputusan Undian';
+      const v = game.verdict, p = v.pId ? gp(v.pId) : null;
+      let body = '';
+      if (v.kind === 'seri') body = `<div class="script"><p class="say">${v.flood ? '🌊 Banjir Kilat. Tiada undian hari ini.' : 'Undian seri. Tiada siapa dihalau hari ini.'}</p></div>`;
+      else if (v.kind === 'datuk') body = `<div class="kad anim" style="--c:var(--pandan)"><div class="songket"></div><div class="kad-body"><span class="eyebrow">Tunggu dulu!</span><span class="big">🎩</span><span class="rn">${esc(p.name)}</span><p>ialah <b>Anak Datuk</b>. Wataknya didedahkan dan dia terselamat kali ini.</p></div></div>`;
+      else body = `<div class="kad anim" style="--c:${game.rules.reveal ? FC[ROLES[p.role].f] : 'var(--kabur)'}"><div class="songket"></div><div class="kad-body"><span class="eyebrow">Dihalau dari kampung${v.votes ? ` · ${v.votes} undi` : ''}</span><span class="big">${game.rules.reveal ? RI(p.role) : '🚪'}</span><span class="rn">${esc(p.name)}</span><p>${game.rules.reveal ? `Wataknya: <b>${esc(RN(p.role))}</b>` : 'Wataknya dirahsiakan.'}</p></div></div>`;
+      const extra = (v.extra || []).map((id) => `<div class="note solo">💔 <b>${esc(gp(id).name)}</b> mati merana kerana kehilangan pasangan.</div>`).join('');
+      box.innerHTML = body + extra + `<button class="btn btn-emas btn-block" onclick="window.continueAfterVerdict()">Teruskan</button>`;
+      return;
+    }
+    if (P === 'over') {
+      E.textContent = 'Permainan tamat'; T.textContent = 'Keputusan';
+      const w = game.winner;
+      box.innerHTML = `<div class="win-banner" style="--c:${FC[w.f]}"><div class="songket"></div><div class="body"><div class="big">${w.icon}</div><h2>${esc(w.title)}</h2><p>${esc(w.sub)}</p></div></div>
+        <div class="sub-h">Watak semua pemain</div>
+        <div class="list">${game.players.map((p) => `<div class="lrow ${p.alive ? '' : 'dead'}"><span>${p.ava} <b>${esc(p.name)}</b> ${p.alive ? '' : '🪦'}${game.lovers && game.lovers.includes(p.id) ? ' 💞' : ''}</span><span>${RL(p.role || 'orang_kampung')}${p.orig && p.orig !== p.role ? ` <span class="muted">(asal ${esc(RN(p.orig))})</span>` : ''}</span></div>`).join('')}</div>
+        <div class="sub-h">Kronologi</div>
+        <div class="log">${game.logs.map((l) => `<div>${l}</div>`).join('') || '<div>Tiada catatan.</div>'}</div>
+        <div class="btn-row"><button class="btn btn-ghost" onclick="window.exitGame()">Ke menu</button><button class="btn btn-emas" onclick="window.playAgain()">Main lagi</button></div>`;
+    }
+  }
+
+  function radarHTML() {
+    if (game.mode !== 'pass_play' || !game.rules.radar || !game.radar) return '';
+    const top = Object.entries(game.radar.s).sort((a, b) => b[1] - a[1]).slice(0, 3);
+    if (!top.length) return '';
+    const max = top[0][1];
+    return `<div class="sub-h">📡 Radar Syak (tanpa nama)</div><div class="radar">${top.map(([id, c]) => { const p = gp(+id); return p ? `<div class="rbar"><i style="width:${c / max * 100}%"></i><span>${p.ava} <b>${esc(p.name)}</b></span><span>${c} syak</span></div>` : ''; }).join('')}</div>
+      <p class="hint">Kiraan pilihan Anti-Kantoi malam tadi. Harimau tak menyumbang, jadi kampung yang menyumbang.</p>`;
+  }
+
+  /* ==================== KAD QR ====================
+     Kad dikodkan terus dalam pautan (#j1...), jadi telefon pemain tak perlu server atau akaun.
+     Penyulitan ringan (XOR + base64url) cuma untuk elak watak terbaca dari pautan, bukan keselamatan sebenar. */
+  const SHARE_URL = 'https://claude.ai/artifact/WL5567b1yRbrAZq9tRsQUP';
+  const cardBase = () => (/^(localhost|127\.0\.0\.1)$/.test(location.hostname) ? location.origin + location.pathname : SHARE_URL);
+  function b64u(bytes) { let s = ''; for (const b of bytes) s += String.fromCharCode(b); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); }
+  function unb64u(str) { str = str.replace(/-/g, '+').replace(/_/g, '/'); while (str.length % 4) str += '='; const s = atob(str), out = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) out[i] = s.charCodeAt(i); return out; }
+  function encodeCard(obj) {
+    const data = new TextEncoder().encode(JSON.stringify(obj)), k = 30 + Math.floor(Math.random() * 200), out = new Uint8Array(data.length + 1);
+    out[0] = k; for (let i = 0; i < data.length; i++) out[i + 1] = data[i] ^ ((k + i * 7) & 255);
+    return 'j1' + b64u(out);
+  }
+  function decodeCard(tok) {
+    try {
+      if (!tok || !tok.startsWith('j1')) return null;
+      const b = unb64u(tok.slice(2)), k = b[0], d = new Uint8Array(b.length - 1);
+      for (let i = 0; i < d.length; i++) d[i] = b[i + 1] ^ ((k + i * 7) & 255);
+      const o = JSON.parse(new TextDecoder().decode(d));
+      return o && o.v === 1 && ROLES[o.r] ? o : null;
+    } catch (e) { return null; }
+  }
+  // Maklumat tambahan pada kad: sasaran Si Pendendam dan kawan sekawanan Harimau.
+  function cardExtras(p) {
+    const ex = {};
+    if (p.role === 'pendendam' && p.target) ex.t = gp(p.target).name;
+    if (isPack(p)) ex.m = alive().filter((x) => isPack(x) && x.id !== p.id).map((x) => x.name);
+    return ex;
+  }
+  function cardURL(p, withNotices) {
+    const payload = { v: 1, c: game.code, n: p.name, a: p.ava, r: dispRole(p), ...cardExtras(p) };
+    if (withNotices && p.notices && p.notices.length) payload.x = p.notices;
+    if (game.rules.neutral) payload.nt = 1;
+    return cardBase() + '#' + encodeCard(payload);
+  }
+  // Pengait ujian: cuma wujud bila app dibuka di localhost semasa pembangunan.
+  if (/^(localhost|127\.0\.0\.1)$/.test(location.hostname)) window.__jadian = { cardURL: (id) => cardURL(gp(id), true), game: () => game };
+  function qrHTML(url, shown) {
+    if (typeof window.qrcode !== 'function') return `<div class="note warn">QR tak dapat dijana (tiada internet masa app dibuka). Guna "Lihat di sini".</div>`;
+    try {
+      const q = window.qrcode(0, 'L'); q.addData(url); q.make();
+      return `<div class="qr ${shown ? '' : 'blur'}">${q.createSvgTag({ cellSize: 4, margin: 2, scalable: true })}</div>`;
+    } catch (e) { return `<div class="note warn">QR terlalu panjang. Guna "Lihat di sini".</div>`; }
+  }
+  function extrasHTML(ex) {
+    return [ex.t ? `<div class="note solo" style="margin-top:8px">🎯 Sasaran kau: <b>${esc(ex.t)}</b></div>` : '',
+      ex.m ? `<div class="note wolf" style="margin-top:8px">🐯 Kawanan: ${ex.m.length ? ex.m.map(esc).join(', ') : 'Tiada. Kau Harimau tunggal.'}</div>` : ''].join('');
+  }
+
+  /* ---------- Agih Kad (mod Moderator) ---------- */
+  function renderDeal(box) {
+    const v = game.dealView, done = game.players.filter((p) => game.dealt[p.id]).length, total = game.players.length;
+    setProgress(done, total, `${done} daripada ${total} pemain dah tengok kad`);
+    if (v) {
+      const p = gp(v.pId);
+      if (v.mode === 'qr') {
+        box.innerHTML = `<div class="script"><span class="eyebrow emas">Imbas QR · Kod ${game.code}</span><p class="say">${p.ava} ${esc(p.name)}, imbas QR ni guna kamera telefon kau.</p>
+            <p class="hint">Pautan akan buka kad kau sahaja. Pastikan orang lain tak imbas sekali.</p></div>
+          ${qrHTML(cardURL(p, true), v.shown)}
+          ${v.shown ? '' : `<button class="btn btn-ghost btn-block" onclick="window.dealShowQR()">👁️ Tunjuk QR</button>`}
+          <div class="btn-row"><button class="btn btn-ghost" onclick="window.dealBack()">Kembali</button><button class="btn btn-pandan" onclick="window.dealDone(${p.id})">Dah imbas ✓</button></div>`;
+        return;
+      }
+      if (v.mode === 'lock') {
+        box.innerHTML = `<div class="lock"><span class="ava lg">${p.ava}</span><h3>Serahkan telefon kepada</h3><div class="who">${esc(p.name)}</div>
+            <p class="hint">Moderator, pandang ke tempat lain.</p>${holdBtnHTML()}
+            <button class="btn btn-ghost btn-sm" onclick="window.dealBack()">Kembali</button></div>`;
+        return;
+      }
+      box.innerHTML = `${kadHTML(p, extrasHTML(cardExtras(p)) + (p.notices && p.notices.length ? `<div class="note solo" style="margin-top:8px">${noticeHTML(p)}</div>` : ''), dispRole(p))}
+        <button class="btn btn-emas btn-block" onclick="window.dealDone(${p.id})">Dah tengok, kunci skrin</button>`;
+      return;
+    }
+    box.innerHTML = `<div class="script"><span class="eyebrow emas">Kod permainan ${game.code}</span><p class="say">Setiap pemain pilih cara tengok kad.</p>
+        <p class="hint">📷 <b>QR</b>: imbas guna telefon sendiri, dan kad kekal dalam telefon dia. 👁️ <b>Lihat di sini</b>: tengok terus di telefon moderator (tak perlu internet).</p></div>
+      <div class="list">${game.players.map((p) => `<div class="trow ${game.dealt[p.id] ? '' : ''}">
+          <span class="ava" style="width:36px;height:36px;font-size:18px">${p.ava}</span>
+          <span class="nm">${esc(p.name)} ${game.dealt[p.id] ? '<span class="tag good">✓</span>' : ''}</span>
+          <span class="btn-row" style="flex-wrap:nowrap"><button class="btn btn-ghost btn-sm" onclick="window.dealOpen(${p.id},'qr')">📷 QR</button><button class="btn btn-ghost btn-sm" onclick="window.dealOpen(${p.id},'lock')">👁️ Lihat</button></span></div>`).join('')}</div>
+      <details class="help"><summary>QR tak boleh dibuka di telefon kawan?</summary>
+        <p>Pautan app mesti dikongsi secara umum. Buka halaman app ni di claude.ai, tekan <b>Share</b>, dan benarkan sesiapa yang ada pautan untuk melihat. Telefon pemain juga perlukan internet. Kalau masih gagal, guna "Lihat".</p></details>
+      <button class="btn btn-emas btn-block" onclick="window.dealFinish()">Mula Malam 1</button>`;
+  }
+  window.dealOpen = function (id, mode) { beep('click'); game.dealView = { pId: id, mode, shown: false }; renderStage(); };
+  window.dealShowQR = function () { beep('click'); game.dealView.shown = true; renderStage(); };
+  window.dealBack = function () { window.holdEnd(); game.dealView = null; renderStage(); };
+  window.dealDone = function (id) { beep('click'); game.dealt[id] = true; gp(id).notices = []; game.dealView = null; renderStage(); };
+  window.dealFinish = function () {
+    const left = game.players.filter((p) => !game.dealt[p.id]);
+    const go = () => { game.dealView = null; window.startNightPhase(); };
+    if (!left.length) { go(); return; }
+    ask({ title: 'Ada yang belum tengok kad', body: `${left.map((p) => p.name).join(', ')} belum ditanda. Mula Malam 1 juga?`, ok: 'Mula juga', onOk: go });
+  };
+  const holdBtnHTML = () => `<button class="btn btn-emas btn-block hold" id="holdBtn" style="--hold-ms:650ms"
+      onpointerdown="window.holdStart(event)" onpointerup="window.holdEnd()" onpointercancel="window.holdEnd()"
+      onkeydown="if((event.key===' '||event.key==='Enter')&&!event.repeat){event.preventDefault();window.holdStart();}" onkeyup="window.holdEnd()"
+      oncontextmenu="return false"><span class="hold-fill"></span><span class="hold-label">🔒 Tekan &amp; tahan untuk buka</span></button>`;
+
+  /* ---------- Halaman kad pemain (dibuka dari QR) ---------- */
+  let cardView = null;
+  function showCardView(data) {
+    cardView = { data, open: false };
+    setup.rules.neutral = !!data.nt;
+    ['home', 'players', 'roles', 'settings', 'game'].forEach((k) => { $('pg_' + k).hidden = true; });
+    $('tabbar').hidden = true; $('topbar').hidden = true; $('pg_card').hidden = false;
+    renderCardView();
+  }
+  function renderCardView() {
+    const d = cardView.data, notices = (d.x || []).map((nt) => noticeLine(nt, d.r)).join('<br>');
+    const body = cardView.open
+      ? `${notices ? `<div class="note solo center reveal-in">${notices}</div>` : ''}
+         ${kadHTML({ name: d.n }, extrasHTML(d), d.r)}
+         <button class="btn btn-ghost btn-block" onclick="window.cardHide()">🙈 Sembunyi kad</button>`
+      : `<div class="kad-back"><div class="songket"></div><div class="kad-back-body"><span class="big">🐯</span><span class="rn">JADIAN</span><span class="muted small">Kad rahsia</span></div><div class="songket"></div></div>
+         ${notices ? '<div class="note solo center">🔔 Watak kau dah bertukar. Buka kad untuk tengok.</div>' : ''}
+         ${holdBtnHTML()}`;
+    $('cardStage').innerHTML = `<div class="cv-head"><span class="ava lg">${d.a || '🙂'}</span><div class="who">${esc(d.n)}</div><span class="tag warn">Kod permainan ${esc(d.c)}</span></div>${body}
+      <p class="hint" style="text-align:center">Jangan tunjuk sesiapa. Kau boleh buka semula kad ni bila-bila masa sepanjang permainan.</p>`;
+  }
+  window.cardHide = function () { cardView.open = false; renderCardView(); };
+  window.showNoticeQR = function () { beep('click'); tempQR = true; renderStage(); };
+
+  /* ---------- Malam: mod moderator ---------- */
+  function renderModNight(box) {
+    if (game.stepIdx >= game.steps.length) { resolveNight(); return; }
+    const st = game.steps[game.stepIdx], a = game.actions;
+    if (st.t === 'lovers' && !game.lovers) { game.stepIdx++; renderModNight(box); return; }
+    const label = st.t === 'notice' ? 'Bisikan rahsia' : st.t === 'lovers' ? '💞 Pasangan' : st.t === 'pendendam' ? RL('pendendam') : RL(st.t === 'harimau' ? 'harimau' : st.t);
+    setProgress(game.stepIdx, game.steps.length, `Langkah ${game.stepIdx + 1} daripada ${game.steps.length} · ${label}`);
+    const evChip = nightEv() && ['purnama', 'kenduri', 'blackout'].includes(nightEv()) ? `<div class="chips"><span class="tag warn">${EVENTS[nightEv()].i} ${EVENTS[nightEv()].n} malam ni</span></div>` : '';
+
+    if (st.t === 'notice') {
+      const p = gp(st.pId);
+      box.innerHTML = `<div class="script"><span class="eyebrow emas">Bisikan rahsia</span><p class="say">Kejutkan <b>${esc(p.name)}</b> secara senyap. Tunjuk skrin ni, atau biar dia imbas QR kad baharunya.</p></div>
+        ${kadHTML(p, extrasHTML(cardExtras(p)) + `<div class="note solo" style="margin-top:8px">${noticeHTML(p)}</div>`, dispRole(p))}
+        ${tempQR ? qrHTML(cardURL(p, true), true) : `<button class="btn btn-ghost btn-block" onclick="window.showNoticeQR()">📷 Tunjuk QR kad baharu</button>`}
+        <button class="btn btn-pandan btn-block" onclick="window.confirmNotice(${p.id})">Dah nampak, tutup mata</button>`;
+      return;
+    }
+    if (st.t === 'lovers') {
+      const [x, y] = game.lovers.map(gp);
+      box.innerHTML = `<div class="script"><span class="eyebrow emas">💞 Pasangan bercinta</span><p class="say">"Moderator akan sentuh bahu 2 orang. Buka mata, kenal pasangan kau, kemudian tutup mata."</p></div>
+        <div class="kad" style="--c:${FC.love}"><div class="songket"></div><div class="kad-body"><span class="big">💞</span><span class="rn">${esc(x.name)} &amp; ${esc(y.name)}</span><p>Kalau seorang mati, seorang lagi mati merana.</p></div></div>
+        <button class="btn btn-emas btn-block" onclick="window.nextStep()">Seterusnya ›</button>`;
+      return;
+    }
+    if (st.dead) {
+      box.innerHTML = `<div class="script"><span class="eyebrow emas">${RL(st.t)} · dah tiada</span><p class="say">"${SAY[st.t]}"</p></div>
+        <div class="note warn big">🎭 Watak ni dah mati. Baca skrip seperti biasa dan tunggu beberapa saat, supaya pemain tak dapat teka siapa yang dah tiada.</div>
+        <button class="btn btn-emas btn-block" onclick="window.nextStep()">Seterusnya ›</button>`;
+      return;
+    }
+    if (st.t === 'mak_dukun') { renderDukunMod(box, evChip); return; }
+
+    const role = st.t, multi = role === 'harimau' ? game.wolfCount : role === 'mak_andam' ? 2 : 1;
+    const holders = alive().filter((p) => (role === 'harimau' ? isPack(p) : p.role === role));
+    const holderTxt = holders.map((p) => esc(p.name) + (p.orig !== p.role ? ' [bertukar]' : '')).join(', ') || '-';
+    const tapNote = (role === 'tok_nujum' || role === 'pak_belalang') && deckHas('pak_belalang')
+      ? `<p class="hint">Ada Pak Belalang dalam permainan: kejutkan <b>${holderTxt}</b> dengan sentuh bahu, jangan panggil kuat-kuat.</p>` : '';
+    // Toyol bertindak awal, jadi moderator tahu siapa kuasanya dicuri sebelum giliran watak itu.
+    const blocked = a.block && (role === 'harimau' ? (holders.length === 1 && holders[0].id === a.block) : holders.some((p) => p.id === a.block)) && !['toyol', 'mak_andam', 'hantu_raya'].includes(role);
+    const kenduri = role === 'harimau' && nightEv() === 'kenduri';
+    if (blocked || kenduri) {
+      box.innerHTML = `${evChip}<div class="script"><span class="eyebrow emas">${RL(role)}</span><p class="say">"${SAY[role]}"</p><p class="hint">Pemegang: ${holderTxt}</p></div>
+        <div class="note ${kenduri ? 'warn' : 'wolf'} big">${kenduri ? '💒 Kenduri Kahwin: kawanan kekenyangan. Bangunkan mereka seperti biasa, tapi tiada serbuan malam ni.' : '🧌 Kuasa ini dicuri Toyol malam ni. Bangunkan seperti biasa dan biar mereka pilih, tapi geleng kepala: kuasa tak berfungsi.'}</div>
+        <button class="btn btn-emas btn-block" onclick="window.skipBlockedStep()">Seterusnya ›</button>`;
+      return;
+    }
+    const sel = (p) => (multi > 1 ? tempTargets.includes(p.id) : tempTargetId === p.id);
+    const avail = alive().filter((p) => !blockReason(role, p)).length;
+    const ready = multi > 1 ? tempTargets.length === Math.min(multi, avail) : !!tempTargetId;
+    const ht = role === 'harimau' ? holders.find((p) => p.role === 'harimau_tua' && !p.biteUsed) : null;
+    const res = INFO.includes(role) && tempTargetId ? infoResult(role, holders[0] && holders[0].id, tempTargetId) : null;
+    const say = role === 'harimau' && multi > 1 ? `Harimau Jadian, buka mata. ${game.cubRevenge ? 'Anak kau dah mati! ' : ''}${nightEv() === 'purnama' ? 'Bulan purnama! ' : ''}Malam ni kau serbu ${multi} rumah!` : SAY[role];
+    box.innerHTML = `${evChip}<div class="script"><span class="eyebrow emas">${role === 'pak_belalang' ? `${RL('pak_belalang')} (dia sangka Tok Nujum)` : RL(role)}</span><p class="say">"${say}"</p><p class="hint">Pemegang: ${holderTxt}</p>${tapNote}</div>
+      <div class="tgrid">${alive().map((p) => {
+        const why = blockReason(role, p);
+        return tcard(p, { sel: sel(p), tone: TONE[role] || '', dis: !!why, sub: why || RN(p.role), on: multi > 1 ? 'window.toggleMulti' : 'window.selectTarget' });
+      }).join('')}</div>
+      ${ht ? `<button class="chip-btn" aria-pressed="${tempBite}" onclick="window.toggleBite()">🐅 Harimau Tua guna gigitan (sekali sahaja): mangsa jadi Harimau</button>` : ''}
+      ${res ? `<div class="note ${res.cls} center big">${res.txt}${role === 'mak_cik_bawang' ? '' : '<br><span class="small">Beri isyarat ibu jari.</span>'}</div>` : ''}
+      <button class="btn btn-emas btn-block" ${!ready ? 'disabled' : ''} onclick="window.confirmModStep()">Sahkan ›</button>`;
+  }
+  function dukunVictims() { return (game.actions.wolf || []).map(gp).filter((p) => p && p.alive); }
+  function dukunPanel(dukun) {
+    const victims = nightEv() === 'kenduri' ? [] : dukunVictims(), pot = dukun.potions || { penawar: false, racun: false };
+    const saveBtns = victims.map((v) => {
+      const bl = v.id === dukun.id && !game.rules.dukunSelf;
+      return tcard(v, { sel: tempDukun.save === v.id, tone: 'good', dis: !pot.penawar || bl, sub: bl ? 'Tak boleh diri sendiri' : 'Mangsa Harimau', on: 'window.dukunSave' });
+    }).join('');
+    return `<div class="potion"><span class="ic">💧</span><div><b>Air Penawar ${pot.penawar ? '' : '· dah habis'}</b><small>${victims.length ? 'Ketik mangsa untuk diselamatkan. Ketik lagi untuk batal.' : 'Tiada mangsa Harimau malam ni.'}</small></div></div>
+      ${victims.length ? `<div class="tgrid">${saveBtns}</div>` : ''}
+      <div class="potion"><span class="ic">☠️</span><div><b>Racun ${pot.racun ? '' : '· dah habis'}</b><small>${pot.racun ? 'Pilihan. Ketik seorang untuk diracun, ketik lagi untuk batal.' : 'Botol racun dah digunakan.'}</small></div></div>
+      ${pot.racun ? `<div class="tgrid">${alive().map((p) => { const why = blockReason('racun', p, dukun); return tcard(p, { sel: tempDukun.poison === p.id, tone: 'bad', dis: !!why, sub: why || '', on: 'window.dukunPoison' }); }).join('')}</div>` : ''}`;
+  }
+  function renderDukunMod(box, evChip) {
+    const d = holder('mak_dukun'), blocked = game.actions.block === d.id;
+    box.innerHTML = `${evChip}<div class="script"><span class="eyebrow emas">${RL('mak_dukun')}</span><p class="say">"${SAY.mak_dukun.replace('Mak Dukun', esc(RN('mak_dukun')))}"</p><p class="hint">Pemegang: ${esc(d.name)}</p></div>
+      ${blocked ? `<div class="note wolf big">🧌 Kuasa ${esc(RN('mak_dukun'))} dicuri Toyol malam ni. Botol tak boleh digunakan.</div><button class="btn btn-emas btn-block" onclick="window.skipBlockedStep()">Seterusnya ›</button>`
+        : `${dukunPanel(d)}<button class="btn btn-emas btn-block" onclick="window.confirmModStep()">Sahkan ›</button>`}`;
+  }
+  window.dukunSave = function (id) { beep('click'); tempDukun.save = tempDukun.save === id ? null : id; renderStage(); };
+  window.dukunPoison = function (id) { beep('click'); tempDukun.poison = tempDukun.poison === id ? null : id; renderStage(); };
+  window.selectTarget = function (id) { beep('click'); tempTargetId = id; renderStage(); };
+  window.toggleBite = function () { beep('click'); tempBite = !tempBite; renderStage(); };
+  window.toggleMulti = function (id) {
+    beep('click');
+    const limit = game.phase === 'night' && (game.mode === 'pass_play' ? ppKind(alive()[game.pp.idx]) : { multi: game.steps[game.stepIdx].t === 'mak_andam' ? 2 : game.wolfCount }).multi;
+    const i = tempTargets.indexOf(id);
+    if (i >= 0) tempTargets.splice(i, 1); else if (tempTargets.length < limit) tempTargets.push(id);
+    renderStage();
+  };
+  window.confirmNotice = function (id) { snap(); beep('click'); gp(id).notices = []; game.stepIdx++; renderStage(); };
+  window.nextStep = function () { snap(); beep('click'); game.stepIdx++; renderStage(); };
+  window.skipBlockedStep = function () {
+    snap(); beep('click');
+    resetTemps(); game.stepIdx++; renderStage();
+  };
+  function applyDukun(d) {
+    if (!d || !d.potions) return;
+    const a = game.actions;
+    a.save = tempDukun.save && d.potions.penawar ? tempDukun.save : null;
+    a.poison = tempDukun.poison && d.potions.racun ? tempDukun.poison : null;
+    a.dukunBy = a.save || a.poison ? d.id : null;
+  }
+  window.confirmModStep = function () {
+    snap(); beep('click');
+    const st = game.steps[game.stepIdx], a = game.actions, role = st.t;
+    const holders = alive().filter((p) => (role === 'harimau' ? isPack(p) : p.role === role));
+    if (role === 'harimau') {
+      a.wolf = game.wolfCount > 1 ? tempTargets.slice() : [tempTargetId];
+      a.wolfBy = holders[0] && holders[0].id;
+      const ht = holders.find((p) => p.role === 'harimau_tua' && !p.biteUsed);
+      if (ht && tempBite) { a.convert = true; a.convertBy = ht.id; }
+    }
+    else if (role === 'mak_andam') setLovers(tempTargets);
+    else if (role === 'mak_dukun') applyDukun(holders[0]);
+    else rec(role, holders[0] && holders[0].id, tempTargetId);
+    resetTemps(); game.stepIdx++; renderStage();
+  };
+
+  /* ---------- Malam: Pass & Play (Pusingan Malam + Pusingan Subuh) ---------- */
+  function ppKind(cur) {
+    const r = cur.role, n = game.night;
+    if (isPack(cur)) return nightEv() === 'kenduri' ? { kind: 'dummy', kenduri: true } : { kind: 'harimau', multi: game.wolfCount };
+    if (r === 'mak_andam' && n === 1) return { kind: 'mak_andam', multi: 2 };
+    if (r === 'hantu_raya' && n === 1) return { kind: 'hantu_raya', multi: 1 };
+    if (['toyol', 'mak_bidan', 'peronda', 'pontianak', 'pelesit', 'tok_nujum', 'pak_belalang', 'cikgu', 'mak_cik_bawang'].includes(r)) return { kind: r, multi: 1 };
+    return { kind: 'dummy', multi: 1 };
+  }
+  const INSTR = {
+    mak_andam: '💐 Pilih <b>2</b> pemain untuk dijodohkan. Boleh termasuk diri sendiri.',
+    hantu_raya: '👥 Pilih seorang tuan. Bila dia mati, kau warisi wataknya.',
+    toyol: '🧌 Pilih seorang. Kuasanya dicuri malam ni.',
+    mak_bidan: '🌿 Pilih 1 pemain untuk dijaga malam ni.',
+    peronda: '🔦 Pilih rumah yang nak dikawal. Kalau diserang, kau yang mati.',
+    pontianak: '👻 Pilih mangsa kau malam ni.',
+    pelesit: '🦟 Pilih seorang untuk diintai: Tok Nujum atau Mak Dukun?',
+    tok_nujum: '🔮 Pilih 1 pemain untuk ditilik.',
+    pak_belalang: '🔮 Pilih 1 pemain untuk ditilik.',
+    cikgu: '📏 Pilih 1 pemain untuk didenda diam esok.',
+    mak_cik_bawang: '🧅 Pilih rumah yang nak diintai. Keputusan keluar masa Pusingan Subuh.'
+  };
+  function renderPPNight(box) {
+    const al = alive(), pp = game.pp;
+    if (pp.idx >= al.length) {
+      if (pp.round === 'malam' && game.needSubuh) { game.pp = { round: 'subuh', idx: 0, open: false }; renderStage(); return; }
+      resolveNight(); return;
+    }
+    const cur = al[pp.idx], subuh = pp.round === 'subuh', a = game.actions;
+    setProgress(pp.idx, al.length, `${subuh ? 'Pusingan Subuh' : 'Pusingan Malam'} · giliran ${pp.idx + 1} daripada ${al.length}`);
+
+    if (!pp.open) {
+      box.innerHTML = `<div class="lock"><span class="ava lg">${cur.ava}</span>
+          ${subuh ? `<span class="tag warn">🌅 Pusingan Subuh</span>` : ''}
+          <h3>Serahkan telefon kepada</h3><div class="who">${esc(cur.name)}</div>
+          <p class="hint">Pastikan orang lain tak nampak skrin.</p>
+          ${holdBtnHTML()}
+        </div>`;
+      return;
+    }
+    const noticeBox = cur.notices && cur.notices.length ? `<div class="note solo center reveal-in">${noticeHTML(cur)}</div>` : '';
+    const extra = cur.role === 'pendendam' && cur.target ? `<div class="note solo" style="margin-top:8px">🎯 Sasaran kau: <b>${esc(gp(cur.target).name)}</b></div>` : '';
+
+    if (subuh) {
+      let inner, ok = true;
+      const info = a.info[cur.id];
+      if (cur.role === 'mak_dukun') inner = `<div class="note warn">🌅 Mangsa Harimau malam ni dah diketahui. Guna botol kalau mahu.</div>${dukunPanel(cur)}`;
+      else if (info && (info.kind === 'mak_cik_bawang' || game.delayInfo)) {
+        const res = infoResult(info.kind, cur.id, info.t);
+        inner = `<div class="note warn">🌅 Keputusan malam tadi:</div><div class="note ${res.cls} center big">${res.txt}</div>`;
+      } else {
+        ok = !!tempTargetId;
+        inner = `<div class="note warn">🌅 Tiada berita untuk anda. Supaya masa pegang telefon sama, jawab soalan ni: <b>siapa yang paling kau percaya?</b></div>
+          <div class="tgrid">${al.map((p) => { const why = blockReason('dummy', p, cur); return tcard(p, { sel: tempTargetId === p.id, tone: 'good', dis: !!why, on: 'window.selectTarget' }); }).join('')}</div>`;
+      }
+      box.innerHTML = `${noticeBox}${kadHTML(cur, extra, dispRole(cur))}<div class="reveal-in" style="display:flex;flex-direction:column;gap:12px">${inner}</div>
+        <button class="btn btn-emas btn-block" id="ppConfirm" data-ok="${ok ? 1 : 0}" data-label="Sahkan &amp; kunci skrin" onclick="window.completePPTurn()">Sahkan &amp; kunci skrin</button>`;
+      updMin(); return;
+    }
+
+    const K = ppKind(cur), kind = K.kind, multi = K.multi || 1;
+    let instr = '🕵️ <b>Misi Anti-Kantoi:</b> pilih 1 pemain yang kau syak, supaya masa pegang telefon nampak sama dengan orang lain.';
+    let pack = '';
+    if (isPack(cur)) {
+      const mates = al.filter((p) => isPack(p) && p.id !== cur.id), sug = (a.wolf || []).map(gp).filter(Boolean);
+      pack = `<div class="note wolf">🐯 <b>Kawanan:</b> ${mates.length ? mates.map((t) => `${t.ava} ${esc(t.name)}${t.role !== 'harimau' ? ` (${esc(RN(t.role))})` : ''}`).join(', ') : 'Tiada. Kau Harimau tunggal.'}
+        ${sug.length && !K.kenduri ? `<br>🎯 <b>Cadangan kawan:</b> ${sug.map((s) => esc(s.name)).join(', ')}. Ketik kad lain kalau nak tukar.` : ''}
+        ${mates.length && !K.kenduri ? `<br><span class="small">Pilihan Harimau terakhir yang pegang telefon jadi sasaran muktamad.</span>` : ''}</div>`;
+      instr = K.kenduri ? '💒 <b>Kenduri Kahwin:</b> kawanan kenyang, tiada serbuan malam ni. Buat Misi Anti-Kantoi: pilih 1 pemain yang kau syak.'
+        : multi > 1 ? `🐯 <b>Malam ni kau serbu ${multi} rumah!</b> Pilih ${multi} mangsa.` : '🐯 <b>Serbuan malam:</b> pilih 1 mangsa. Kawan kawanan dikunci.';
+    } else if (kind !== 'dummy') instr = INSTR[kind];
+    else if (cur.role === 'mak_dukun') instr = '⚗️ Botol digunakan masa <b>Pusingan Subuh</b>, selepas mangsa diketahui. Sekarang buat Misi Anti-Kantoi: pilih 1 pemain yang kau syak.';
+    if (['tok_nujum', 'pak_belalang', 'pelesit'].includes(kind)) instr += game.delayInfo ? ' Keputusan keluar masa Pusingan Subuh.' : ' Keputusan keluar serta-merta dan pilihan dikunci.';
+    const instant = ['tok_nujum', 'pak_belalang', 'pelesit'].includes(kind) && !game.delayInfo;
+    const res = instant && tempTargetId ? infoResult(kind, cur.id, tempTargetId) : null;
+    const sel = (p) => (multi > 1 ? tempTargets.includes(p.id) : tempTargetId === p.id);
+    const avail = al.filter((p) => !blockReason(kind, p, cur)).length;
+    const ok = multi > 1 ? tempTargets.length === Math.min(multi, avail) : !!tempTargetId;
+    const htToggle = kind === 'harimau' && cur.role === 'harimau_tua' && !cur.biteUsed
+      ? `<button class="chip-btn" aria-pressed="${tempBite}" onclick="window.toggleBite()">🐅 Guna gigitan (sekali sahaja): mangsa jadi Harimau, bukan mati</button>` : '';
+    box.innerHTML = `${noticeBox}${kadHTML(cur, extra, dispRole(cur))}
+      <div class="reveal-in" style="display:flex;flex-direction:column;gap:12px">
+      ${pack}<div class="note warn">${instr}</div>
+      <div class="tgrid">${al.map((p) => {
+        let why = blockReason(kind, p, cur);
+        if (instant && seerDone && p.id !== tempTargetId) why = why || ' ';
+        return tcard(p, { sel: sel(p), tone: TONE[kind] || '', dis: !!why, sub: (why || '').trim(), on: multi > 1 ? 'window.toggleMulti' : 'window.selectPPTarget' });
+      }).join('')}</div>
+      ${htToggle}
+      ${res ? `<div class="note ${res.cls} center big">${res.txt}</div>` : ''}
+      </div>
+      <button class="btn btn-emas btn-block" id="ppConfirm" data-ok="${ok ? 1 : 0}" data-label="Sahkan &amp; kunci skrin" onclick="window.completePPTurn()">Sahkan &amp; kunci skrin</button>`;
+    updMin();
+  }
+  // Butang Sahkan dikunci sehingga masa minimum tamat, supaya tempoh pegang telefon tak dedahkan siapa ada kuasa.
+  function updMin() {
+    const b = $('ppConfirm'); if (!b) { clearInterval(minInt); return; }
+    const left = Math.ceil((minUntil - Date.now()) / 1000), okSel = b.dataset.ok === '1';
+    b.disabled = left > 0 || !okSel;
+    b.innerHTML = left > 0 ? `Tunggu ${left} saat…` : b.dataset.label;
+    if (left <= 0) clearInterval(minInt);
+  }
+  function armMin(sec) { minUntil = Date.now() + sec * 1000; clearInterval(minInt); if (sec > 0) minInt = setInterval(updMin, 250); }
+  window.selectPPTarget = function (id) {
+    const cur = alive()[game.pp.idx], k = ppKind(cur).kind;
+    const instant = ['tok_nujum', 'pak_belalang', 'pelesit'].includes(k) && !game.delayInfo;
+    if (instant && seerDone) return;
+    beep('click'); tempTargetId = id; if (instant) seerDone = true;
+    renderStage();
+  };
+  // Tekan & tahan: isian bergerak guna peralihan CSS (transform), dan pemasa tunggal membuka kunci. Tiada kerja setiap bingkai.
+  window.holdStart = function (e) {
+    if (e) e.preventDefault();
+    const b = $('holdBtn'); if (!b) return;
+    try { if (e && e.pointerId != null) b.setPointerCapture(e.pointerId); } catch (_) {}
+    warmAudio();
+    b.classList.add('holding');
+    clearTimeout(holdT); holdT = setTimeout(unlockTurn, 650);
+  };
+  window.holdEnd = function () { clearTimeout(holdT); holdT = null; const b = $('holdBtn'); if (b) b.classList.remove('holding'); };
+  window.startHoldUnlock = window.holdStart;
+  function unlockTurn() {
+    holdT = null;
+    const buzz = () => { try { if (navigator.vibrate) navigator.vibrate(18); } catch (_) {} };
+    // Kad pemain yang dibuka dari QR.
+    if (cardView && !cardView.open) { buzz(); cardView.open = true; flipNext = true; renderCardView(); beep('click'); return; }
+    // "Lihat di sini" masa Agih Kad dalam mod Moderator.
+    if (game && game.phase === 'deal' && game.dealView && game.dealView.mode === 'lock') { buzz(); game.dealView.mode = 'open'; flipNext = true; renderStage(); beep('click'); return; }
+    if (!game || game.phase !== 'night' || game.mode !== 'pass_play' || game.pp.open) return;
+    buzz();
+    const cur = alive()[game.pp.idx];
+    game.pp.open = true; resetTemps();
+    if (game.pp.round === 'malam' && isPack(cur) && nightEv() !== 'kenduri') {
+      const w = (game.actions.wolf || []).filter((id) => gp(id) && gp(id).alive);
+      if (game.wolfCount > 1) tempTargets = w.slice(0, game.wolfCount); else tempTargetId = w[0] || null;
+    }
+    armMin(game.pp.round === 'subuh' ? Math.min(4, game.holdSec) : game.holdSec);
+    flipNext = true;
+    renderStage(); beep('click');
+  }
+  // Tiada snap() dalam Pass & Play waktu malam: Undo dikunci supaya skrin pemain lain tak boleh dibuka semula.
+  window.completePPTurn = function () {
+    beep('click');
+    const cur = alive()[game.pp.idx], a = game.actions;
+    cur.notices = [];
+    if (game.pp.round === 'subuh') {
+      if (cur.role === 'mak_dukun') applyDukun(cur);
+      else if (tempTargetId && game.rules.radar) game.radar.t[tempTargetId] = (game.radar.t[tempTargetId] || 0) + 1;
+    } else {
+      const K = ppKind(cur);
+      if (K.kind === 'harimau') {
+        a.wolf = K.multi > 1 ? tempTargets.slice() : [tempTargetId]; a.wolfBy = cur.id;
+        if (cur.role === 'harimau_tua') { if (tempBite) { a.convert = true; a.convertBy = cur.id; } else if (a.convertBy === cur.id) { a.convert = false; a.convertBy = null; } }
+      } else if (K.kind === 'mak_andam') setLovers(tempTargets);
+      else if (K.kind === 'dummy') { if (tempTargetId && game.rules.radar && !isPack(cur)) game.radar.s[tempTargetId] = (game.radar.s[tempTargetId] || 0) + 1; }
+      else rec(K.kind, cur.id, tempTargetId);
+    }
+    resetTemps(); clearInterval(minInt); game.pp.open = false; game.pp.idx++;
+    renderStage();
+  };
+
+  /* ==================== SELESAIKAN MALAM ==================== */
+  function kill(p, cause) {
+    if (!p || !p.alive) return false;
+    p.alive = false; p.cause = cause; game._dead.push(p.id);
+    if (p.role === 'pemburu') game.hunters.push(p.id);
+    if (p.role === 'anak_harimau') { game.cubRevenge = true; game.logs.push(`🐾 Anak Harimau (${esc(p.name)}) mati. Kawanan akan serbu 2 rumah malam berikutnya.`); }
+    inheritHantuRaya(p);
+    game.players.forEach((x) => {
+      if (x.alive && x.role === 'pendendam' && x.target === p.id && cause !== 'vote') {
+        setRole(x, 'si_luncai'); addNotice(x, { kind: 'luncai' });
+        game.logs.push(`🎯 ${esc(p.name)}, sasaran Si Pendendam (${esc(x.name)}), mati bukan kerana undian. ${esc(x.name)} kini Si Luncai.`);
+      }
+    });
+    if (game.lovers && game.lovers.includes(p.id)) {
+      const o = gp(game.lovers.find((id) => id !== p.id));
+      if (o && o.alive) { game.logs.push(`💔 ${esc(o.name)} mati merana kerana kehilangan pasangannya, ${esc(p.name)}.`); kill(o, 'merana'); }
+    }
+    return true;
+  }
+  function inheritHantuRaya(dead) {
+    game.players.forEach((p) => {
+      if (p.alive && p.role === 'hantu_raya' && p.idol === dead.id) {
+        setRole(p, dead.role);
+        if (dead.potions) p.potions = { ...dead.potions };
+        p.biteUsed = !!dead.biteUsed;
+        if (dead.role === 'pendendam') { p.target = dead.target; if (!p.target || p.target === p.id || !gp(p.target).alive) pickTarget(p); }
+        addNotice(p, { kind: 'hantu', from: dead.name });
+        game.logs.push(`👥 ${esc(dead.name)} mati, jadi Hantu Raya (${esc(p.name)}) mewarisi watak ${esc(RN(dead.role))}.`);
+      }
+    });
+  }
+  function convertTraitors() {
+    if (game.players.some((p) => p.alive && isPack(p))) return;
+    game.players.forEach((p) => {
+      if (p.alive && p.role === 'musuh') {
+        setRole(p, 'harimau'); addNotice(p, { kind: 'musuh' });
+        game.logs.push(`🛏️ Harimau terakhir tumpas. Musuh Dalam Selimut (${esc(p.name)}) kini Harimau Jadian.`);
+      }
+    });
+  }
+  function turnTiger(t, kind, n) {
+    setRole(t, 'harimau'); addNotice(t, { kind });
+    game.logs.push(kind === 'gigit' ? `Malam ${n}: ${esc(t.name)} digigit Harimau Tua dan bertukar jadi Harimau Jadian.` : `Malam ${n}: ${esc(t.name)} (Kena Gigit) diserbu dan bertukar jadi Harimau Jadian.`);
+  }
+
+  function resolveNight() {
+    if (game.mode === 'pass_play') history = [];
+    const a = game.actions, n = game.night, bl = a.block;
+    game._dead = [];
+    const packAlive = alive().filter(isPack);
+    const wolfBlocked = bl && packAlive.length === 1 && packAlive[0].id === bl;
+    const docOn = a.doc && a.docBy !== bl, guardOn = a.guard && a.guardBy !== bl;
+    const dukunOn = a.dukunBy && a.dukunBy !== bl;
+    // "Semalam" dikira hanya bila kuasa betul-betul berjalan (tak dicuri Toyol), sama dalam kedua-dua mod.
+    game.lastDoc = docOn ? a.doc : null;
+    game.lastMute = a.mute && a.muteBy !== bl ? a.mute : null;
+    if (bl) game.logs.push(`Malam ${n}: Toyol mencuri kuasa ${esc(gp(bl).name)}.`);
+
+    const attacks = [];
+    if (nightEv() === 'kenduri') game.logs.push(`Malam ${n}: Kenduri Kahwin. Harimau kekenyangan dan tak menyerbu.`);
+    else if (!wolfBlocked) (a.wolf || []).forEach((id) => attacks.push({ id, by: 'harimau' }));
+    if (a.sk && a.skBy !== bl) attacks.push({ id: a.sk, by: 'pontianak' });
+    if (dukunOn) {
+      const d = gp(a.dukunBy);
+      if (a.save) { d.potions.penawar = false; game.logs.push(`Malam ${n}: ${esc(RN('mak_dukun'))} menuang Air Penawar untuk ${esc(gp(a.save).name)}.`); }
+      if (a.poison) { d.potions.racun = false; attacks.push({ id: a.poison, by: 'racun' }); }
+    }
+    const save = dukunOn ? a.save : null;
+    const convertOn = a.convert && a.convertBy !== bl;
+    game.cubRevenge = false;
+    let guard = guardOn ? a.guard : null;
+    const peronda = alive().find((p) => p.role === 'peronda');
+    const who = { harimau: 'Harimau Jadian', pontianak: 'Pontianak', racun: RN('mak_dukun') };
+    let biteDone = false;
+
+    attacks.forEach((at) => {
+      const t = gp(at.id); if (!t || !t.alive) return;
+      if (at.by === 'harimau' && save === t.id) { game.logs.push(`Malam ${n}: ${esc(t.name)} diserbu Harimau, tapi Air Penawar menyelamatkannya.`); return; }
+      if (docOn && a.doc === t.id) { game.logs.push(`Malam ${n}: ${esc(who[at.by])} menyerang ${esc(t.name)}, tapi Mak Bidan menjaganya.`); return; }
+      if (guard === t.id && peronda && peronda.alive && peronda.id !== t.id) {
+        guard = null;
+        if (docOn && a.doc === peronda.id) { game.logs.push(`Malam ${n}: Peronda RT (${esc(peronda.name)}) menghalang ${esc(who[at.by])} di rumah ${esc(t.name)}, dan Mak Bidan menjaga Peronda.`); return; }
+        game.logs.push(`Malam ${n}: Peronda RT (${esc(peronda.name)}) mati mempertahankan rumah ${esc(t.name)} daripada ${esc(who[at.by])}.`);
+        kill(peronda, at.by); return;
+      }
+      if (at.by === 'harimau' && t.role === 'pontianak' && game.rules.skImmune) { game.logs.push(`Malam ${n}: Harimau menyerbu ${esc(t.name)} (Pontianak), tapi dia kebal.`); return; }
+      if (t.role === 'abang_sado' && !t.sadoUsed) { t.sadoUsed = true; game.logs.push(`Malam ${n}: ${esc(who[at.by])} menyerang ${esc(t.name)}, tapi Abang Sado tahan serangan pertama.`); return; }
+      if (at.by === 'harimau' && convertOn && !biteDone && t.role !== 'pontianak') { biteDone = true; gp(a.convertBy).biteUsed = true; turnTiger(t, 'gigit', n); return; }
+      if (at.by === 'harimau' && t.role === 'kena_gigit') { turnTiger(t, 'kenagigit', n); return; }
+      game.logs.push(`Malam ${n}: ${esc(t.name)} ${at.by === 'harimau' ? 'diserbu Harimau Jadian' : at.by === 'pontianak' ? 'dibunuh Pontianak' : `diracun ${esc(RN('mak_dukun'))}`}.`);
+      kill(t, at.by);
+    });
+    const mt = a.mute && a.muteBy !== bl ? gp(a.mute) : null;
+    if (mt && mt.alive) { mt.muted = true; game.logs.push(`Malam ${n}: ${esc(mt.name)} didenda Cikgu Disiplin.`); }
+    convertTraitors();
+    game.summary = { dead: game._dead.slice(), muted: mt && mt.alive ? mt.id : null };
+    if (game.hunters.length) { game.hunterNext = 'morning'; game.phase = 'hunter'; renderStage(); }
+    else goMorning();
+  }
+
+  window.confirmHunterShot = function (skip) {
+    snap(); beep('click');
+    const h = gp(game.hunters.shift()), v = skip ? null : gp(tempTargetId);
+    tempTargetId = null;
+    if (v && v.alive) { game.logs.push(`🏹 Pemburu (${esc(h.name)}) menembak mati ${esc(v.name)}.`); kill(v, 'pemburu'); }
+    else game.logs.push(`🏹 Pemburu (${esc(h.name)}) memilih untuk tak menembak.`);
+    if (game.hunterNext === 'morning' && game.summary) game.summary.dead = game._dead.slice();
+    if (game.hunterNext === 'vote' && game.verdict) game.verdict.extra = game._dead.filter((id) => id !== game.verdict.pId);
+    convertTraitors();
+    if (game.hunters.length) renderStage();
+    else if (game.hunterNext === 'morning') goMorning();
+    else afterVoteCheck();
+  };
+  function goMorning() {
+    const w = checkWin(); if (w) { endWith(w); return; }
+    game.event = null;
+    if (game.rules.events && Math.random() < .4) { const ks = Object.keys(EVENTS); game.event = { id: ks[Math.floor(Math.random() * ks.length)] }; game.logs.push(`Pagi ${game.night}: Peristiwa kampung, ${EVENTS[game.event.id].n}.`); }
+    beep('morning'); game.phase = 'morning'; renderStage();
+  }
+  function endWith(w) { clearInterval(timerInt); game.winner = w; game.phase = 'over'; beep('win'); renderStage(); }
+
+  /* ==================== MASA ==================== */
+  const fmt = (s) => String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0');
+  function ringHTML(small) {
+    return `<div class="ring ${small ? 'sm' : ''}" id="ring"><svg viewBox="0 0 120 120"><circle class="bg" cx="60" cy="60" r="52"/><circle class="fg" id="ringFg" cx="60" cy="60" r="52" pathLength="100" stroke-dasharray="100" stroke-dashoffset="0"/></svg><div class="ring-txt" id="timerTxt">${fmt(remSec)}</div></div>`;
+  }
+  function updateTimerUI() {
+    const t = $('timerTxt'), fg = $('ringFg'), ring = $('ring');
+    if (t) t.textContent = fmt(remSec);
+    if (fg) fg.setAttribute('stroke-dashoffset', String(100 - (timerTotal ? remSec / timerTotal * 100 : 0)));
+    if (ring) ring.classList.toggle('done', remSec === 0);
+  }
+  function startTimer() {
+    clearInterval(timerInt);
+    timerInt = setInterval(() => { if (remSec > 0) { remSec--; updateTimerUI(); if (remSec === 0) { beep('alarm'); clearInterval(timerInt); } } else clearInterval(timerInt); }, 1000);
+  }
+  window.startDayDiscussion = function () {
+    beep('click'); game.phase = 'discuss';
+    let s = game.discTime === 'auto' ? alive().length * 30 : parseInt(game.discTime, 10);
+    if (game.event && game.event.id === 'pasar') s += 60;
+    if (game.event && game.event.id === 'hujan') s = Math.max(30, Math.round(s / 2));
+    remSec = timerTotal = s;
+    renderStage(); startTimer();
+  };
+  window.adjustTimerSeconds = function (d) { remSec = Math.max(0, remSec + d); if (remSec > timerTotal) timerTotal = remSec; updateTimerUI(); if (remSec > 0 && d > 0) startTimer(); };
+  window.startDayVoting = function () {
+    beep('click'); clearInterval(timerInt); tempTargetId = null;
+    if (game.voteMode === 'mahkamah') { snap(); game.court = { accused: [], idx: 0, counts: {}, ketuaVote: null, ghosts: {} }; game.phase = 'accuse'; renderStage(); return; }
+    game.phase = 'vote'; remSec = timerTotal = game.voteTime; renderStage(); startTimer();
+  };
+  window.skipVoteFlood = function () {
+    snap(); beep('click'); clearInterval(timerInt);
+    game.logs.push(`Siang ${game.night}: Banjir Kilat, tiada undian.`);
+    game.verdict = { kind: 'seri', flood: true }; game.phase = 'verdict'; renderStage();
+  };
+
+  /* ==================== KETUA KAMPUNG ==================== */
+  const revealedKetua = () => alive().find((p) => p.role === 'ketua' && p.revealed);
+  function ketuaBtn() {
+    if (!deckHas('ketua') || revealedKetua() || !game.players.some((p) => p.role === 'ketua' && p.alive)) return '';
+    return `<button class="btn btn-ghost btn-sm" style="flex:0 0 auto" onclick="window.openKetua()">🏛️ Ketua Kampung dedah diri</button>`;
+  }
+  window.openKetua = function () {
+    openSheet(`<div class="pagehead"><span class="eyebrow emas">Pengesahan app</span><h1>Siapa mengaku Ketua Kampung?</h1><p>Ketik pemain yang mengaku. App akan sahkan sama ada dia betul-betul Ketua Kampung.</p></div>
+      <div class="tgrid">${alive().map((p) => tcard(p, { on: 'window.claimKetua' })).join('')}</div>
+      <button class="btn btn-ghost btn-block" onclick="window.closeSheet()">Batal</button>`);
+  };
+  window.claimKetua = function (id) {
+    const p = gp(id); window.closeSheet();
+    if (p.role === 'ketua') { snap(); p.revealed = true; game.logs.push(`Siang ${game.night}: ${esc(p.name)} disahkan sebagai Ketua Kampung. Undinya dikira 2.`); beep('morning'); toast(`Sah! ${p.name} ialah Ketua Kampung. Undinya dikira 2.`); }
+    else { beep('alarm'); toast(`${p.name} BUKAN Ketua Kampung!`); }
+    renderStage();
+  };
+
+  /* ==================== MAHKAMAH KAMPUNG ==================== */
+  function renderCourt(box, E, T) {
+    const c = game.court, P = game.phase, k = revealedKetua();
+    E.textContent = `Mahkamah · Siang ${game.night}`;
+    if (P === 'accuse') {
+      T.textContent = 'Tuduhan';
+      box.innerHTML = `<div class="script"><span class="eyebrow emas">Langkah 1 · Tuduhan</span><p class="say">Siapa yang dituduh hari ini? Pilih sehingga 3 orang.</p><p class="hint">Seorang tuduh, seorang lagi sokong, baru masuk senarai.</p></div>
+        <div class="tgrid">${alive().map((p) => tcard(p, { sel: c.accused.includes(p.id), tone: 'bad', on: 'window.toggleAccuse', sub: p.muted ? '📏 Didenda' : p.revealed ? RL(p.role) : '' })).join('')}</div>
+        <div class="btn-row" style="justify-content:center;">${ketuaBtn()}</div>
+        <div class="btn-row"><button class="btn btn-ghost" onclick="window.executeVote(null)">Tiada tuduhan</button><button class="btn btn-merah" ${!c.accused.length ? 'disabled' : ''} onclick="window.startDefense()">Mula bela diri (${c.accused.length})</button></div>`;
+      return;
+    }
+    if (P === 'defense') {
+      T.textContent = 'Bela Diri';
+      const p = gp(c.accused[c.idx]);
+      box.innerHTML = `<div class="script"><span class="eyebrow emas">Langkah 2 · Bela diri ${c.idx + 1}/${c.accused.length}</span><p class="say">${esc(p.name)}, kau ada masa untuk pertahankan diri.</p>${p.muted ? '<p class="hint">📏 Dia didenda Cikgu Disiplin, jadi dia cuma boleh guna isyarat.</p>' : ''}</div>
+        <div style="display:flex;justify-content:center"><span class="ava lg">${p.ava}</span></div>
+        ${ringHTML(true)}
+        <div class="btn-row"><button class="btn btn-ghost" onclick="window.startTally()">Terus kira undi</button><button class="btn btn-emas" onclick="window.nextDefense()">${c.idx + 1 < c.accused.length ? 'Seterusnya ›' : 'Kira undi ›'}</button></div>`;
+      updateTimerUI(); return;
+    }
+    // tally
+    T.textContent = 'Kira Undi';
+    const al = alive(), totals = tallyTotals(), used = Object.values(c.counts).reduce((x, y) => x + y, 0);
+    const max = Math.max(0, ...c.accused.map((id) => totals[id]));
+    const leaders = c.accused.filter((id) => totals[id] === max && max > 0);
+    const ghosts = game.rules.ghost ? game.players.filter((p) => !p.alive && !p.ghostUsed) : [];
+    box.innerHTML = `<div class="script"><span class="eyebrow emas">Langkah 3 · Undian</span><p class="say">Untuk setiap tertuduh, minta yang setuju angkat tangan. Masukkan bilangan tangan.</p>
+        <p class="hint">${al.length} orang hidup boleh mengundi.${k ? ` 🏛️ Undi Ketua Kampung (${esc(k.name)}) dikira 2: kira tangannya macam biasa, kemudian pilih di bawah siapa dia undi.` : ''}</p></div>
+      <div class="list">${c.accused.map((id) => { const p = gp(id), n = c.counts[id] || 0; return `<div class="trow ${leaders.length === 1 && leaders[0] === id ? 'lead' : ''}">
+        <span class="ava" style="width:36px;height:36px;font-size:18px">${p.ava}</span><span class="nm">${esc(p.name)}</span>
+        <span class="stepper"><button onclick="window.tallyAdj(${id},-1)" ${n <= 0 ? 'disabled' : ''} aria-label="Kurang undi ${esc(p.name)}">−</button><span>${n}</span><button onclick="window.tallyAdj(${id},1)" ${used >= al.length ? 'disabled' : ''} aria-label="Tambah undi ${esc(p.name)}">+</button><b class="score">${totals[id]}</b></span></div>`; }).join('')}</div>
+      ${k ? `<div class="ghost"><b>🏛️ Ketua Kampung ${esc(k.name)} undi siapa?</b><div class="chips">${c.accused.map((id) => `<button class="chip-btn" aria-pressed="${c.ketuaVote === id}" onclick="window.ketuaVote(${id})">${esc(gp(id).name)}</button>`).join('')}<button class="chip-btn" aria-pressed="${!c.ketuaVote}" onclick="window.ketuaVote(0)">Tak undi</button></div></div>` : ''}
+      ${ghosts.length ? `<div class="sub-h">👻 Roh Penasaran (1 undi terakhir)</div>${ghosts.map((g) => `<div class="ghost"><b>${g.ava} ${esc(g.name)}</b><div class="chips">${c.accused.map((id) => `<button class="chip-btn" aria-pressed="${c.ghosts[g.id] === id}" onclick="window.ghostVote(${g.id},${id})">${esc(gp(id).name)}</button>`).join('')}<button class="chip-btn" aria-pressed="${!c.ghosts[g.id]}" onclick="window.ghostVote(${g.id},0)">Simpan undi</button></div></div>`).join('')}` : ''}
+      <div class="note ${leaders.length === 1 ? 'bad' : 'warn'} center big">${leaders.length === 1 ? `${esc(gp(leaders[0]).name)} dapat undi terbanyak (${max}).` : leaders.length > 1 ? `Seri ${max} undi. Tiada siapa dihalau.` : 'Belum ada undi.'}</div>
+      <button class="btn btn-merah btn-block" onclick="window.finishTally()">Umum keputusan</button>`;
+  }
+  function tallyTotals() {
+    const c = game.court, t = {};
+    c.accused.forEach((id) => { t[id] = c.counts[id] || 0; });
+    if (c.ketuaVote && t[c.ketuaVote] != null && revealedKetua()) t[c.ketuaVote] += 1;
+    Object.values(c.ghosts).forEach((id) => { if (id && t[id] != null) t[id] += 1; });
+    return t;
+  }
+  window.toggleAccuse = function (id) {
+    beep('click'); const a = game.court.accused, i = a.indexOf(id);
+    if (i >= 0) a.splice(i, 1); else if (a.length < 3) a.push(id); else toast('Maksimum 3 tertuduh.');
+    renderStage();
+  };
+  window.startDefense = function () { snap(); beep('click'); game.court.idx = 0; game.phase = 'defense'; remSec = timerTotal = game.voteTime; renderStage(); startTimer(); };
+  window.nextDefense = function () {
+    beep('click'); const c = game.court;
+    if (c.idx + 1 < c.accused.length) { c.idx++; remSec = timerTotal = game.voteTime; renderStage(); startTimer(); }
+    else window.startTally();
+  };
+  window.startTally = function () { snap(); clearInterval(timerInt); beep('click'); game.phase = 'tally'; renderStage(); };
+  window.tallyAdj = function (id, d) { const c = game.court; c.counts[id] = Math.max(0, (c.counts[id] || 0) + d); renderStage(); };
+  window.ketuaVote = function (id) { game.court.ketuaVote = id || null; renderStage(); };
+  window.ghostVote = function (gid, id) { if (id) game.court.ghosts[gid] = id; else delete game.court.ghosts[gid]; renderStage(); };
+  window.finishTally = function () {
+    const c = game.court, totals = tallyTotals();
+    const max = Math.max(0, ...c.accused.map((id) => totals[id]));
+    const leaders = c.accused.filter((id) => totals[id] === max && max > 0);
+    snap();
+    Object.keys(c.ghosts).forEach((gid) => { const g = gp(+gid); if (g) { g.ghostUsed = true; game.logs.push(`Siang ${game.night}: Roh ${esc(g.name)} mengundi ${esc(gp(c.ghosts[gid]).name)}.`); } });
+    window.executeVote(leaders.length === 1 ? leaders[0] : null, max, true);
+  };
+
+  /* ==================== UNDIAN & MENANG ==================== */
+  window.executeVote = function (pid, votes, snapped) {
+    if (!snapped) snap();
+    clearInterval(timerInt); beep('click');
+    const vp = pid ? gp(pid) : null; tempTargetId = null; game._dead = [];
+    if (!vp) { game.logs.push(`Siang ${game.night}: Undian seri, tiada siapa dihalau.`); game.verdict = { kind: 'seri' }; game.phase = 'verdict'; renderStage(); return; }
+    if (vp.role === 'anak_datuk' && !vp.datukUsed) {
+      vp.datukUsed = true; vp.revealed = true;
+      game.logs.push(`Siang ${game.night}: ${esc(vp.name)} diundi keluar, tapi dia Anak Datuk dan terselamat.`);
+      game.verdict = { kind: 'datuk', pId: vp.id }; game.phase = 'verdict'; renderStage(); return;
+    }
+    game.logs.push(`Siang ${game.night}: ${esc(vp.name)} (${esc(RN(vp.role))}) dihalau dari kampung${votes ? ` dengan ${votes} undi` : ''}.`);
+    if (vp.role === 'si_luncai') { vp.alive = false; endWith({ f: 'solo', icon: '🎃', title: 'Si Luncai menang!', sub: `Biarlah, biarlah! ${vp.name} berjaya memperdaya kampung supaya menghalaunya.` }); return; }
+    const pend = game.players.find((x) => x.alive && x.role === 'pendendam' && x.target === vp.id);
+    kill(vp, 'vote');
+    if (pend && pend.alive) { endWith({ f: 'solo', icon: '🎯', title: 'Si Pendendam menang!', sub: `${pend.name} berjaya buat kampung menghalau ${vp.name}, sasaran dendamnya.` }); return; }
+    convertTraitors();
+    game.verdict = { kind: 'out', pId: vp.id, votes, extra: game._dead.filter((id) => id !== vp.id) }; game.phase = 'verdict'; renderStage();
+  };
+  window.continueAfterVerdict = function () {
+    beep('click');
+    if (game.hunters.length) { game.hunterNext = 'vote'; game.phase = 'hunter'; renderStage(); }
+    else afterVoteCheck();
+  };
+  function afterVoteCheck() { const w = checkWin(); if (w) { endWith(w); return; } game.night++; initNight(); }
+
+  function checkWin() {
+    const al = alive();
+    const pack = al.filter(isPack).length, mus = al.filter((p) => p.role === 'musuh').length, sk = al.filter((p) => p.role === 'pontianak');
+    const wolfSide = al.filter((p) => ROLES[p.role].f === 'wolf').length, others = al.length - wolfSide;
+    if (!al.length) return { f: 'none', icon: '💀', title: 'Kampung kosong', sub: 'Semua pemain telah terkorban. Tiada siapa menang.' };
+    if (game.lovers && al.length === 2 && game.lovers.every((id) => gp(id).alive)) {
+      const [x, y] = game.lovers.map(gp), side = (p) => (ROLES[p.role].f === 'solo' ? 'solo' + p.id : ROLES[p.role].f);
+      if (side(x) !== side(y)) return { f: 'love', icon: '💞', title: 'Pasangan Bercinta menang!', sub: `${x.name} dan ${y.name} hidup bahagia berdua, walaupun dari pihak berbeza.` };
+    }
+    if (pack === 0 && mus === 0 && sk.length === 0) return { f: 'good', icon: '🌾', title: 'Kampung aman semula!', sub: 'Semua Harimau dan pembunuh telah tumpas. Esok boleh kenduri!' };
+    if (sk.length && pack === 0 && al.length <= 2) return { f: 'solo', icon: '👻', title: 'Pontianak menang!', sub: `${sk[0].name} tinggal hampir seorang diri di kampung yang sunyi.` };
+    if (sk.length === 1 && al.length === 2 && game.rules.skImmune) return { f: 'solo', icon: '👻', title: 'Pontianak menang!', sub: `${sk[0].name} kebal serbuan Harimau dan tinggal berdua sahaja.` };
+    if (sk.length === 0 && pack > 0 && wolfSide >= others) return { f: 'wolf', icon: '🐯', title: 'Harimau Jadian menang!', sub: 'Bilangan pihak Harimau dah menyamai orang kampung. Kampung jatuh ke tangan kawanan.' };
+    return null;
+  }
+
+  loadStorage();
+  autoBal();
+  // Kalau pautan dibuka dari QR (#j1...), tunjuk kad pemain sahaja. Kalau tidak, buka app biasa.
+  const boot = () => { const c = decodeCard(location.hash.slice(1)); if (c) showCardView(c); else { cardView = null; $('pg_card').hidden = true; window.go('home'); } };
+  window.addEventListener('hashchange', () => { if (!game) boot(); });
+  boot();
+})();
+</script>

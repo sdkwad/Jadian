@@ -1,0 +1,387 @@
+<title>Kajian Harimau Jadian</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Grenze+Gotisch:wght@500;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
+<style>
+  /* Layout: laporan satu lajur (maks ~72ch) di atas langit malam app yang sama; jadual watak boleh ditapis. */
+  :root {
+    color-scheme: dark;
+    --night: #0b1220;
+    --surface: #121b31;
+    --surface-2: #18233e;
+    --line: #27345a;
+    --ink: #eef0f6;
+    --muted: #9aa4be;
+    --moon: #f2e6c4;
+    --pelita: #eaa53a;
+    --kampung: #4fbf86;
+    --harimau: #e5534b;
+    --solo: #b07de0;
+    --font-display: 'Grenze Gotisch', 'Times New Roman', serif;
+    --font-body: 'Plus Jakarta Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: linear-gradient(180deg, #070d1c, #101a33 40%, var(--night)); background-attachment: fixed; color: var(--ink); font-family: var(--font-body); font-size: 16px; line-height: 1.6; }
+  a { color: var(--pelita); }
+  :focus-visible { outline: 2px solid var(--pelita); outline-offset: 2px; }
+  .wrap { max-width: 860px; margin: 0 auto; padding-inline: 16px; padding-block: 28px 80px; display: flex; flex-direction: column; gap: 44px; }
+  header { display: flex; flex-direction: column; gap: 10px; padding-top: 8px; }
+  .eyebrow { font-size: 12px; letter-spacing: .14em; text-transform: uppercase; font-weight: 800; color: var(--pelita); }
+  h1 { margin: 0; font-family: var(--font-display); font-weight: 700; font-size: clamp(48px, 10vw, 84px); line-height: .92; color: var(--moon); text-wrap: balance; }
+  .lede { margin: 0; font-size: 18px; color: #d3d7e5; max-width: 62ch; }
+  h2 { margin: 0 0 4px; font-family: var(--font-display); font-weight: 500; font-size: 38px; line-height: 1; color: var(--moon); text-wrap: balance; }
+  h3 { margin: 18px 0 6px; font-size: 17px; font-weight: 800; }
+  section { display: flex; flex-direction: column; gap: 12px; }
+  section > p, section li { max-width: 70ch; }
+  p { margin: 0; }
+  ul, ol { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; }
+  .muted { color: var(--muted); }
+  .small { font-size: 13px; }
+
+  .verdicts { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; }
+  .verdict { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 14px 16px; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+  .verdict b { font-size: 15px; }
+  .verdict span { font-size: 14px; color: var(--muted); }
+  .verdict .k { font-size: 11px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--pelita); }
+
+  .scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 640px; }
+  th, td { text-align: left; vertical-align: top; padding: 10px 12px; border-bottom: 1px solid var(--line); }
+  th { font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); font-weight: 800; background: var(--surface-2); position: sticky; top: 0; }
+  tr:last-child td { border-bottom: 0; }
+  td b { display: block; }
+  td small { color: var(--muted); font-size: 12px; display: block; }
+
+  .chip { display: inline-block; font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 99px; white-space: nowrap; }
+  .y { background: rgba(79,191,134,.15); color: var(--kampung); }
+  .u { background: rgba(234,165,58,.15); color: var(--pelita); }
+  .n { background: rgba(229,83,75,.15); color: #ff8c84; }
+  .f-good { color: var(--kampung); } .f-wolf { color: #ff8c84; } .f-solo { color: #d2adf5; }
+  .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
+
+  .filters { display: flex; flex-wrap: wrap; gap: 6px; }
+  .filters button { border: 1px solid var(--line); background: var(--surface); color: var(--muted); padding: 7px 12px; border-radius: 99px; font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
+  .filters button[aria-pressed="true"] { border-color: var(--pelita); color: var(--pelita); background: rgba(234,165,58,.1); }
+
+  .callout { border-radius: 14px; padding: 14px 16px; border: 1px solid; display: flex; flex-direction: column; gap: 6px; }
+  .callout.bad { background: rgba(229,83,75,.08); border-color: rgba(229,83,75,.35); }
+  .callout.good { background: rgba(79,191,134,.08); border-color: rgba(79,191,134,.35); }
+  .callout.warn { background: rgba(234,165,58,.08); border-color: rgba(234,165,58,.35); }
+  .callout b.t { font-size: 15px; }
+
+  .script { display: grid; gap: 8px; }
+  .line { display: grid; grid-template-columns: 130px 1fr; gap: 12px; padding: 10px 14px; border-radius: 12px; background: var(--surface); border: 1px solid var(--line); }
+  .line .when { font-size: 12px; font-weight: 800; color: var(--pelita); letter-spacing: .06em; text-transform: uppercase; padding-top: 3px; }
+  .line q { font-style: italic; }
+  @media (max-width: 520px) { .line { grid-template-columns: 1fr; gap: 2px; } }
+
+  .order { counter-reset: s; list-style: none; padding: 0; gap: 8px; }
+  .order li { counter-increment: s; display: grid; grid-template-columns: 34px 1fr; gap: 10px; align-items: start; }
+  .order li::before { content: counter(s); width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; background: var(--surface-2); border: 1px solid var(--line); font-weight: 800; font-size: 13px; font-variant-numeric: tabular-nums; }
+
+  .ideas { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 10px; }
+  .idea { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+  .idea .top { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+  .idea b { font-size: 15px; }
+  .idea p { font-size: 14px; color: #cfd3e1; }
+
+  .phases { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 10px; }
+  .phase { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 8px; }
+  .phase h3 { margin: 0; }
+  .phase ul { font-size: 14px; }
+  footer { font-size: 13px; color: var(--muted); }
+  footer ul { gap: 4px; }
+</style>
+
+<div class="wrap">
+  <header>
+    <span class="eyebrow">Kajian reka bentuk · Werewolf Malaysia v4</span>
+    <h1>Harimau Jadian</h1>
+    <p class="lede">Konsep permainan tetap sama: kampung cari pembunuh yang menyamar. Yang kita ubah ialah watak, bahasa dan suasana, supaya rasa macam kampung kita sendiri. Kita juga gunakan kelebihan app untuk buat benda yang kad fizikal tak boleh buat.</p>
+  </header>
+
+  <section>
+    <h2>Keputusan utama</h2>
+    <div class="verdicts">
+      <div class="verdict"><span class="k">Tema</span><b>Serigala jadi Harimau Jadian</b><span>Malaysia memang ada cerita orang jadi harimau. Ini padanan paling tepat untuk "werewolf".</span></div>
+      <div class="verdict"><span class="k">White Werewolf</span><b>Buang, ganti dengan Musuh Dalam Selimut</b><span>Logik menang yang bertukar di tengah permainan memang punca rasa pelik. Butiran di bawah.</span></div>
+      <div class="verdict"><span class="k">Witch</span><b>Tambah sebagai Mak Dukun</b><span>Air Penawar dan Racun, sekali guna setiap satu. Mod Pass-and-Play perlukan Pusingan Subuh.</span></div>
+      <div class="verdict"><span class="k">Watak</span><b>25 watak, 3 puak</b><span>Setiap watak ditanda sama ada boleh jalan dalam Kad Fizikal, Kad Digital dan Pass-and-Play.</span></div>
+      <div class="verdict"><span class="k">Enjin</span><b>Watak berasaskan data</b><span>Setiap watak jadi satu rekod: puak, turutan malam, jenis tindakan dan mod yang disokong. Tambah watak baru tak perlu sentuh enjin.</span></div>
+      <div class="verdict"><span class="k">Inovasi</span><b>Radar Syak &amp; Kad Peristiwa</b><span>Pilihan "palsu" Anti-Kantoi diubah jadi data berguna, dan setiap pagi boleh ada peristiwa kampung.</span></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Apa yang kita belajar daripada platform lain</h2>
+    <p class="muted">Lapan permainan dan app dalam keluarga "deduksi sosial" yang sama. Lajur terakhir ialah apa yang kita ambil.</p>
+    <div class="scroll">
+      <table>
+        <thead><tr><th>Permainan</th><th>Ciri utama</th><th>Pengajaran untuk kita</th></tr></thead>
+        <tbody>
+          <tr><td><b>Mafia</b><small>Dimitry Davidoff, 1986</small></td><td>Minoriti yang tahu siapa kawan lawan majoriti yang tak tahu apa-apa.</td><td>Teras ni jangan diusik. Setiap watak baharu mesti kekalkan jurang maklumat ni.</td></tr>
+          <tr><td><b>Werewolf</b><small>Andrew Plotkin, 1997</small></td><td>Bawa tema serigala dan Seer.</td><td>Tema boleh ditukar tanpa ubah mekanik. Sebab tu Harimau Jadian sesuai.</td></tr>
+          <tr><td><b>Loups-Garous de Thiercelieux</b><small>Perancis, 2001</small></td><td>Asal Witch, Cupid, Hunter, Little Girl dan Loup Blanc (White Werewolf). Ada turutan bangun malam yang tetap.</td><td>Witch dan Cupid patut ada. Loup Blanc dicipta untuk kumpulan besar dengan moderator berpengalaman.</td></tr>
+          <tr><td><b>Ultimate Werewolf</b><small>Bezier Games</small></td><td>Setiap kad ada nilai imbangan. Versi Extreme imbang ikut nilai maklumat berbanding bilangan serigala.</td><td>Meter imbangan kita betul arahnya. Boleh diperhalusi dengan "nilai maklumat" setiap watak.</td></tr>
+          <tr><td><b>One Night Ultimate Werewolf</b><small>Bezier Games</small></td><td>Satu malam sahaja, app jadi narator suara, kad ditukar-tukar.</td><td>Narator suara memang berguna. Mekanik tukar kad tak sesuai dengan format eliminasi kita.</td></tr>
+          <tr><td><b>Town of Salem 1 &amp; 2</b><small>Online</small></td><td>Watak disusun ikut kategori: Siasat, Lindung, Bunuh, Sokongan, dan Neutral (Jester, Executioner).</td><td>Kategori ni bantu Auto-Balance pilih watak dengan adil. Executioner jadi Si Pendendam.</td></tr>
+          <tr><td><b>Wolvesville</b><small>Online, 100+ watak</small></td><td>Setiap pemain guna telefon sendiri. Ada kuota solo pembunuh dan solo undi, dan watak macam Aura Seer dan Wolf Seer.</td><td>Kuota ikut kategori lebih kemas daripada senarai tetap. Wolf Seer jadi Pelesit.</td></tr>
+          <tr><td><b>Blood on the Clocktower</b><small>Pencerita + Grimoire</small></td><td>Pemain yang dah mati masih ada satu undi. Ada watak yang dapat maklumat salah tanpa dia sedar (Drunk).</td><td>Roh Penasaran (orang mati masih ada peranan) dan Pak Belalang. Kedua-duanya hanya app boleh urus.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>Kenapa White Werewolf rasa pelik</h2>
+    <div class="callout bad">
+      <b class="t">Masalah yang kau rasa masa main tadi tu memang betul</b>
+      <ul>
+        <li><b>Satu kad, dua identiti.</b> Dia bangun bersama kawanan tapi syarat menangnya boleh bertukar di tengah permainan. Pemain susah faham, dan moderator susah nak terangkan.</li>
+        <li><b>Hampir mustahil menang solo.</b> Dalam peraturan asal, dia kena jadi orang terakhir yang hidup. Dengan Doktor dan Pemburu di pihak kampung, ini jarang berlaku.</li>
+        <li><b>Kuasanya tolong pihak lawan.</b> Bila dia bunuh Serigala, yang untung ialah kampung, bukan dia.</li>
+        <li><b>Mudah kantoi dalam Pass-and-Play.</b> App tunjuk senarai kawan Serigala. Bila seorang Serigala mati waktu malam, kawanan terus tahu siapa pengkhianatnya.</li>
+        <li><b>Cuma aktif malam genap.</b> Dalam kumpulan bawah 12 orang, permainan selalu tamat sebelum kuasanya bermakna.</li>
+        <li><b>Peraturan tak seragam.</b> Ada versi yang benarkan dia bunuh sesiapa, ada yang cuma Serigala. Pemain yang pernah main versi lain akan bertelagah.</li>
+      </ul>
+    </div>
+    <div class="callout good">
+      <b class="t">Cadangan: ganti dengan Musuh Dalam Selimut</b>
+      <p>Musuh Dalam Selimut ialah watak pengkhianat yang dah lama ada dalam keluarga Werewolf. Dia pihak Harimau, tapi tak bangun waktu malam dan tak kenal kawanan. Tok Nujum nampak dia BAIK. Bila Harimau terakhir mati, app beritahu dia secara rahsia yang dia kini Harimau Jadian, dan permainan bersambung.</p>
+      <p>Syarat menangnya cuma satu dan tak pernah bertukar, iaitu menang bersama kawanan. Tapi dia tetap bawa rasa "ada orang dalam yang belot" yang kau suka pada White Werewolf.</p>
+    </div>
+    <p class="muted small">Kalau masih nak simpan White Werewolf, letak dia dalam "Mod Lanjutan" untuk 12 pemain ke atas sahaja. Dia sentiasa solo dari awal, setiap malam genap wajib bunuh seorang Serigala, dan menang hanya bila tinggal seorang.</p>
+  </section>
+
+  <section>
+    <h2>Witch jadi Mak Dukun</h2>
+    <p>Mak Dukun bangun selepas Harimau. App tunjuk siapa mangsa malam ini. Dia ada dua botol, dan setiap satu cuma boleh guna sekali sepanjang permainan:</p>
+    <ul>
+      <li><b>Air Penawar</b> menyelamatkan mangsa Harimau malam ini.</li>
+      <li><b>Racun</b> membunuh 1 pemain pilihannya.</li>
+    </ul>
+    <p>Peraturan rumah yang dicadangkan: boleh guna kedua-dua botol pada malam yang sama (ikut versi asal Perancis), dan Air Penawar tak boleh digunakan pada diri sendiri. Mak Bidan yang lindung dulu dan Mak Dukun yang guna Air Penawar pada orang sama hanya membazir botol, jadi app akan beri amaran.</p>
+    <div class="callout warn">
+      <b class="t">Masalah dalam Pass-and-Play dan cara selesaikan</b>
+      <p>Dalam Pass-and-Play, telefon diedar ikut tempat duduk. Kalau giliran Mak Dukun sampai sebelum Harimau buat pilihan, dia tak tahu siapa mangsanya. Kalau turutan diubah supaya Harimau main dulu, orang boleh teka siapa Harimau.</p>
+      <p><b>Penyelesaian: Pusingan Subuh.</b> Selepas semua orang ambil giliran malam, telefon diedar sekali lagi untuk pusingan pendek. Setiap pemain buka skrin dan nampak "berita peribadi":</p>
+      <ul>
+        <li>Mak Dukun buat keputusan botol, sebab sekarang dia dah tahu mangsa.</li>
+        <li>Tok Nujum dapat keputusan tilikan, selepas Toyol (kalau ada) diambil kira.</li>
+        <li>Pasangan Mak Andam, orang Kena Gigit, dan pewaris Hantu Raya dapat tahu perubahan mereka.</li>
+        <li>Pemain lain jawab satu soalan ringkas (contoh: "Siapa paling kau syak?"). Jawapan ni masuk ke Radar Syak.</li>
+      </ul>
+      <p class="small muted">Pusingan Subuh cuma muncul kalau ada watak yang memerlukannya, jadi permainan ringkas tak jadi panjang.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>Cara Malaysiakan tanpa ubah konsep</h2>
+    <ul>
+      <li><b>Pembunuh utama ialah Harimau Jadian.</b> Cerita orang jadi harimau dah lama ada dalam budaya Melayu dan Orang Asli. Rasa dia lokal tapi peranannya sama macam serigala.</li>
+      <li><b>Watak kampung ialah orang yang semua kenal:</b> Mak Bidan, Peronda RT, Cikgu Disiplin, Mak Cik Bawang, Ketua Kampung, Abang Sado.</li>
+      <li><b>Watak solo dan pihak gelap dari cerita rakyat:</b> Pontianak, Toyol, Pelesit, Hantu Raya. Watak jenaka dari hikayat: Si Luncai dan Pak Pandir. Watak dari filem P. Ramlee: Pak Belalang (Nujum Pak Belalang).</li>
+      <li><b>Suasana:</b> mesyuarat di balai raya, ayam berkokok waktu pagi, rumah atas tiang, cahaya pelita.</li>
+    </ul>
+    <div class="callout warn">
+      <b class="t">Perkara yang patut dielak</b>
+      <ul>
+        <li><b>Watak tokoh agama</b> (Ustaz, Imam, Tok Kadi). Ramai yang akan rasa tak selesa kalau tokoh agama jadi watak dalam permainan bunuh-membunuh.</li>
+        <li><b>Orang Minyak dan Penanggal.</b> Cerita mereka berkait dengan serangan seksual dan wanita mengandung. Tak sesuai untuk permainan parti.</li>
+        <li><b>Watak berasaskan kaum.</b> Guna pekerjaan atau perangai (Tauke Kedai, Abang Grab, Mak Cik Bawang), bukan bangsa.</li>
+        <li><b>Nama "Bomoh" dan "santau".</b> Ada keluarga yang sensitif. Sediakan nama alternatif neutral dalam tetapan, contohnya "Tok Herba" dengan "Penawar" dan "Racun".</li>
+      </ul>
+    </div>
+  </section>
+
+  <section>
+    <h2>Katalog watak</h2>
+    <p class="muted">Lajur mod: <span class="chip y">Ya</span> boleh terus, <span class="chip u">Ubah</span> perlu langkah tambahan dalam app, <span class="chip n">Tidak</span> tak sesuai. Tahap menunjukkan kerumitan untuk pemain baru.</p>
+    <div class="filters" id="filters">
+      <button data-f="all" aria-pressed="true">Semua</button>
+      <button data-f="good">Pasukan Kampung</button>
+      <button data-f="wolf">Kawanan Harimau</button>
+      <button data-f="solo">Solo</button>
+      <button data-f="pp">Serasi penuh Pass-and-Play</button>
+      <button data-f="asas">Tahap Asas</button>
+    </div>
+    <div class="scroll">
+      <table>
+        <thead><tr><th>Watak</th><th>Kuasa</th><th>Fizikal</th><th>Digital</th><th>Pass-and-Play</th><th>Tahap</th></tr></thead>
+        <tbody id="roleRows"></tbody>
+      </table>
+    </div>
+    <p class="muted small">Watak yang dibuang: White Werewolf (diganti Musuh Dalam Selimut). Nama yang ditukar: Detektif jadi Tok Nujum, Doktor jadi Mak Bidan, Spellcaster jadi Cikgu Disiplin, Serial Killer jadi Pontianak, Jester jadi Si Luncai, Doppelgänger jadi Hantu Raya.</p>
+  </section>
+
+  <section>
+    <h2>Turutan bangun malam</h2>
+    <p class="muted">Turutan ni penting supaya kuasa yang menyekat (Toyol) dan yang bergantung pada mangsa (Mak Dukun) betul. Watak yang tiada dalam permainan dilangkau secara automatik.</p>
+    <ol class="order">
+      <li><span><b>Bisikan rahsia</b> <span class="muted">— Hantu Raya, Kena Gigit dan Musuh Dalam Selimut yang baru bertukar watak</span></span></li>
+      <li><span><b>Mak Andam</b> <span class="muted">— Malam 1 sahaja. Kemudian pasangan buka mata dan kenal sesama sendiri.</span></span></li>
+      <li><span><b>Hantu Raya</b> <span class="muted">— Malam 1 sahaja. Pilih tuan.</span></span></li>
+      <li><span><b>Toyol</b> <span class="muted">— sekat kuasa 1 pemain sebelum orang lain bertindak</span></span></li>
+      <li><span><b>Mak Bidan, Peronda RT</b> <span class="muted">— perlindungan</span></span></li>
+      <li><span><b>Harimau Jadian</b> <span class="muted">— termasuk Anak Harimau dan Harimau Tua</span></span></li>
+      <li><span><b>Mak Dukun</b> <span class="muted">— nampak mangsa, pilih Air Penawar atau Racun</span></span></li>
+      <li><span><b>Pontianak</b></span></li>
+      <li><span><b>Pelesit, Tok Nujum, Pak Belalang, Mak Cik Bawang</b> <span class="muted">— maklumat</span></span></li>
+      <li><span><b>Cikgu Disiplin</b> <span class="muted">— denda senyap untuk esok</span></span></li>
+    </ol>
+  </section>
+
+  <section>
+    <h2>Keserasian dengan tiga mod</h2>
+    <p>Jawapan ringkas: <b>ya, kita boleh kawal semua watak dalam ketiga-tiga mod</b>, kecuali Pak Belalang dalam mod Kad Fizikal. Syaratnya, enjin tahu tiga perkara tentang setiap watak.</p>
+    <div class="scroll">
+      <table>
+        <thead><tr><th>Mod</th><th>Apa yang app tahu</th><th>Tambahan yang diperlukan</th></tr></thead>
+        <tbody>
+          <tr><td><b>Kad Fizikal</b></td><td>Cuma apa yang moderator tag.</td><td>
+            <ul>
+              <li>Watak pasif (Abang Sado, Pak Pandir, Anak Datuk, Musuh Dalam Selimut, Kena Gigit) pun mesti di-tag Malam 1. Cadangan: satu skrin "Tag Semua Kad" sebelum malam bermula, bukan satu langkah untuk setiap watak.</li>
+              <li>Watak yang bertukar perlukan langkah "bisikan" macam Doppelgänger sekarang.</li>
+              <li>Pak Belalang tak boleh, sebab kad fizikal akan dedahkan wataknya.</li>
+            </ul></td></tr>
+          <tr><td><b>Kad Digital</b></td><td>Semua.</td><td>Tiada. App jadi buku rahsia (Grimoire) moderator sepenuhnya.</td></tr>
+          <tr><td><b>Pass-and-Play</b></td><td>Semua, tapi tindakan berlaku ikut giliran tempat duduk.</td><td>
+            <ul>
+              <li>Pusingan Subuh untuk watak yang bergantung pada tindakan orang lain.</li>
+              <li>Masa minimum yang sama untuk setiap giliran (contoh 8 saat), supaya tempoh pegang telefon tak dedahkan siapa ada kuasa.</li>
+              <li>Semua keputusan tilikan diberi masa Pusingan Subuh, bukan serta-merta.</li>
+            </ul></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <h3>Rekod watak dalam enjin</h3>
+    <p>Setiap watak menjadi satu rekod data yang menyatakan:</p>
+    <ul>
+      <li>puak dan cara Tok Nujum nampak dia</li>
+      <li>bila dia bangun dan jenis tindakannya (pilih sasaran, ya/tidak, atau pasif)</li>
+      <li>kesan semasa diserang, diundi atau mati</li>
+      <li>mod yang disokong</li>
+    </ul>
+    <p>Auto-Balance dan skrip moderator dibina terus daripada rekod ini. Watak yang tak serasi dengan mod pilihan akan dikelabukan secara automatik.</p>
+  </section>
+
+  <section>
+    <h2>Skrip moderator ala kampung</h2>
+    <div class="script">
+      <div class="line"><span class="when">Malam</span><span><q>Kampung dah gelap. Ayam pun dah masuk reban. Semua tutup mata.</q></span></div>
+      <div class="line"><span class="when">Harimau</span><span><q>Harimau Jadian, bangun. Rumah siapa korang nak serbu malam ni?</q></span></div>
+      <div class="line"><span class="when">Mak Dukun</span><span><q>Mak Dukun, bangun. Ini mangsa malam ni. Nak guna Air Penawar? Atau ada orang yang nak diberi Racun?</q></span></div>
+      <div class="line"><span class="when">Pagi</span><span><q>Kukuruyuk! Semua bangun, kita berkumpul di balai raya.</q></span></div>
+      <div class="line"><span class="when">Undi</span><span><q>Mesyuarat tergempar! Siapa yang nak dihalau dari kampung?</q></span></div>
+      <div class="line"><span class="when">Menang</span><span><q>Kampung kita aman semula. Esok boleh kenduri!</q></span></div>
+    </div>
+    <p class="muted small">Pilihan dialek dalam tetapan juga boleh dibuat. Contohnya untuk giliran Harimau: Kelantan <q>Pilih sapo nok make malam ni</q>, Utara <q>Pilih sapa hang nak makan malam ni</q>, Sabah <q>Pilih siapa kamurang mau makan malam ni bah</q>. Ayat dialek perlu disemak oleh penutur asli dulu sebelum dimasukkan.</p>
+  </section>
+
+  <section>
+    <h2>Idea inovasi</h2>
+    <div class="ideas">
+      <div class="idea"><div class="top"><b>Radar Syak</b><span class="chip y">Mudah</span></div><p>Pilihan Anti-Kantoi dalam Pass-and-Play sekarang dibuang begitu sahaja. Kita kumpul jawapan tu dan tunjuk waktu pagi, contohnya "Kampung paling syak: Abu (4 undi)". Pemain biasa jadi ada sumbangan, dan Harimau terpaksa berlakon.</p></div>
+      <div class="idea"><div class="top"><b>Kad Peristiwa</b><span class="chip y">Mudah</span></div><p>Pilihan untuk satu peristiwa rawak setiap pagi. Contoh: <i>Bulan Purnama</i> (Harimau bunuh 2), <i>Kenduri Kahwin</i> (malam ni tiada serangan), <i>Banjir Kilat</i> (undian dibatalkan), <i>Blackout</i> (Tok Nujum tak boleh menilik).</p></div>
+      <div class="idea"><div class="top"><b>Mahkamah Kampung</b><span class="chip u">Sederhana</span></div><p>Undian bermula dengan pencalonan, kemudian 30 saat untuk membela diri, kemudian kiraan undi dalam app. Ini membolehkan Ketua Kampung (undi dikira 2) dan rekod siapa undi siapa.</p></div>
+      <div class="idea"><div class="top"><b>Roh Penasaran</b><span class="chip y">Mudah</span></div><p>Pemain yang dah mati dapat satu undi terakhir untuk digunakan sekali sahaja. Diambil daripada Blood on the Clocktower. Orang yang mati awal tak bosan menunggu.</p></div>
+      <div class="idea"><div class="top"><b>Suara narator</b><span class="chip u">Sederhana</span></div><p>Guna suara Bahasa Melayu yang dah ada dalam pelayar untuk bacakan skrip. Moderator tak perlu baca dari skrin, dan boleh pilih loghat.</p></div>
+      <div class="idea"><div class="top"><b>Pek tema</b><span class="chip u">Sederhana</span></div><p>Mekanik sama, nama dan ikon berbeza. Antara pilihan:</p><ul><li><i>Kampung</i> (asal)</li><li><i>Asrama</i>, dengan Hantu Asrama, Warden dan Pengawas</li><li><i>Pejabat</i>, dengan Spy Syarikat, Auditor, HR dan Intern</li><li><i>Klasik</i>, untuk nama Serigala asal</li></ul></div>
+      <div class="idea"><div class="top"><b>Pak Belalang</b><span class="chip u">Sederhana</span></div><p>Watak yang hanya boleh wujud dalam app. Dia sangka dirinya Tok Nujum, tapi keputusan tilikannya rawak. Bila dia dan Tok Nujum sebenar dua-dua mengaku, kampung kena fikir siapa yang betul.</p></div>
+      <div class="idea"><div class="top"><b>Rumusan &amp; kongsi</b><span class="chip y">Mudah</span></div><p>Selepas tamat, app tunjuk rumusan siapa buat apa setiap malam, dan beri teks ringkas yang boleh disalin ke WhatsApp. Contoh: "🐯 Harimau menang! MVP: Siti si Mak Dukun".</p></div>
+      <div class="idea"><div class="top"><b>Anggaran peluang menang</b><span class="chip u">Sederhana</span></div><p>App main ribuan permainan rawak di latar untuk setiap susunan watak, kemudian tunjuk anggaran kasar seperti "Kampung 54% · Harimau 41% · Solo 5%". Lebih jujur daripada markah berat semata-mata.</p></div>
+      <div class="idea"><div class="top"><b>Mod Multi-Telefon</b><span class="chip n">Besar</span></div><p>Setiap pemain guna telefon sendiri dengan kod bilik, macam Wolvesville tapi untuk main bersemuka. Perlukan pelayan masa nyata, jadi sesuai untuk fasa akhir.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Pelan pelaksanaan</h2>
+    <div class="phases">
+      <div class="phase"><span class="eyebrow">Fasa 1 · v4.0</span><h3>Asas baru</h3><ul>
+        <li>Enjin watak berasaskan data</li>
+        <li>Tema Harimau Jadian dan nama baru</li>
+        <li>Buang White Werewolf, tambah Musuh Dalam Selimut</li>
+        <li>Mak Dukun dan Pusingan Subuh</li>
+        <li>Peronda RT, Anak Datuk, Abang Sado, Pak Pandir, Anak Harimau, Si Pendendam</li>
+        <li>Skrin "Tag Semua Kad" untuk mod Kad Fizikal</li>
+      </ul></div>
+      <div class="phase"><span class="eyebrow">Fasa 2 · v4.x</span><h3>Lebih dalam</h3><ul>
+        <li>Mak Andam, Kena Gigit, Mak Cik Bawang, Pelesit, Toyol</li>
+        <li>Mahkamah Kampung dan Ketua Kampung</li>
+        <li>Radar Syak, Roh Penasaran, Kad Peristiwa</li>
+        <li>Rumusan dan teks kongsi</li>
+      </ul></div>
+      <div class="phase"><span class="eyebrow">Fasa 3 · v5</span><h3>Pengalaman penuh</h3><ul>
+        <li>Suara narator dan pilihan loghat</li>
+        <li>Pek tema Asrama, Pejabat dan Klasik</li>
+        <li>Pak Belalang dan Harimau Tua</li>
+        <li>Anggaran peluang menang</li>
+        <li>Mod Multi-Telefon</li>
+      </ul></div>
+    </div>
+  </section>
+
+  <footer>
+    <p><b>Sumber rujukan</b></p>
+    <ul>
+      <li><a href="https://regles2jeux.fr/la-regle-du-loup-garou-nouvelle-lune/" target="_blank" rel="noopener">Règles Loups-Garous Nouvelle Lune (kad peristiwa)</a></li>
+      <li><a href="https://www.pokebip.com/espace-membre/blogs/408959/article/288126" target="_blank" rel="noopener">Peraturan Loup Blanc dan variasinya</a></li>
+      <li><a href="https://beziergames.com/blogs/news/ultimate-werewolf-extreme" target="_blank" rel="noopener">Bezier Games: Ultimate Werewolf Extreme (sistem imbangan nilai maklumat)</a></li>
+      <li><a href="https://commonsensegamer.com/?p=22113" target="_blank" rel="noopener">Town of Salem 2: kategori watak</a></li>
+      <li><a href="https://steamah.com/wolvesville-beginner-team-village-guide/" target="_blank" rel="noopener">Panduan pasukan kampung Wolvesville</a></li>
+      <li><a href="https://werewolf-online.fandom.com/wiki/Wolf_Seer" target="_blank" rel="noopener">Wiki Werewolf Online: Wolf Seer</a></li>
+      <li><a href="https://github.com/Nwen/BOTC-Storyteller" target="_blank" rel="noopener">BotC Storyteller (contoh Grimoire digital)</a></li>
+      <li><a href="https://mechanicsofmagic.com/2022/04/07/one-night-ultimate-werewolf-critical-play-tristan-wang/" target="_blank" rel="noopener">Analisis One Night Ultimate Werewolf</a></li>
+      <li><a href="https://www.Wikipedia.com/wiki/Malay_ghost_myths" target="_blank" rel="noopener">Wikipedia: Ghosts in Malay culture</a></li>
+      <li><a href="https://says.com/my/lifestyle/5-types-malaysian-hantus" target="_blank" rel="noopener">SAYS: 5 jenis hantu Malaysia</a></li>
+    </ul>
+  </footer>
+</div>
+
+<script>
+(function () {
+  // [nama, padanan asal, puak, kuasa, fizikal, digital, pp, tahap]  y = Ya, u = Ubah, n = Tidak
+  const R = [
+    ['Orang Kampung', 'Villager', 'good', 'Tiada kuasa. Cari dan undi Harimau waktu siang.', 'y', 'y', 'y', 'Asas'],
+    ['Tok Nujum', 'Seer', 'good', 'Setiap malam tilik 1 pemain: BAIK atau BAHAYA.', 'y', 'y', 'y', 'Asas'],
+    ['Mak Bidan', 'Doctor', 'good', 'Setiap malam lindung 1 pemain daripada serangan.', 'y', 'y', 'y', 'Asas'],
+    ['Mak Dukun', 'Witch', 'good', 'Air Penawar sekali (selamatkan mangsa Harimau) dan Racun sekali (bunuh 1 pemain).', 'y', 'y', 'u', 'Sederhana'],
+    ['Pemburu', 'Hunter', 'good', 'Bila mati, boleh tembak 1 pemain atau tak tembak.', 'y', 'y', 'y', 'Asas'],
+    ['Cikgu Disiplin', 'Silencer', 'good', 'Denda 1 pemain: dia tak boleh bercakap esok siang.', 'y', 'y', 'y', 'Asas'],
+    ['Peronda RT', 'Bodyguard', 'good', 'Kawal 1 rumah. Kalau rumah tu diserang, Peronda yang mati.', 'y', 'y', 'y', 'Sederhana'],
+    ['Mak Cik Bawang', 'Watcher', 'good', 'Intai 1 rumah. Esok dia tahu sama ada penghuni rumah tu guna kuasa malam tadi.', 'y', 'y', 'u', 'Sederhana'],
+    ['Ketua Kampung', 'Mayor', 'good', 'Boleh dedah diri waktu siang. Selepas itu undinya dikira 2.', 'u', 'u', 'u', 'Sederhana'],
+    ['Anak Datuk', 'Prince', 'good', 'Kali pertama diundi keluar, dia dedah watak dan terselamat.', 'u', 'y', 'y', 'Asas'],
+    ['Abang Sado', 'Tough Guy', 'good', 'Tahan 1 serangan malam. Serangan kedua baru dia mati.', 'u', 'y', 'y', 'Asas'],
+    ['Pak Pandir', 'Lycan', 'good', 'Orang kampung biasa, tapi Tok Nujum nampak dia BAHAYA.', 'u', 'y', 'y', 'Asas'],
+    ['Kena Gigit', 'Cursed', 'good', 'Kalau diserang Harimau, dia tak mati tapi bertukar jadi Harimau Jadian.', 'u', 'y', 'u', 'Sederhana'],
+    ['Mak Andam', 'Cupid', 'good', 'Malam 1 jodohkan 2 pemain. Kalau seorang mati, pasangannya mati merana.', 'y', 'y', 'u', 'Sederhana'],
+    ['Pak Belalang', 'Drunk / Insane Seer', 'good', 'Sangka dirinya Tok Nujum, tapi keputusan tilikannya rawak.', 'n', 'y', 'y', 'Lanjutan'],
+    ['Harimau Jadian', 'Werewolf', 'wolf', 'Bangun bersama kawanan dan bunuh 1 mangsa setiap malam.', 'y', 'y', 'y', 'Asas'],
+    ['Anak Harimau', 'Wolf Cub', 'wolf', 'Bila dia mati, kawanan bunuh 2 mangsa malam berikutnya.', 'y', 'y', 'y', 'Sederhana'],
+    ['Harimau Tua', 'Alpha Wolf', 'wolf', 'Sekali sahaja: jadikan mangsa sebagai Harimau Jadian, bukan bunuh.', 'y', 'y', 'u', 'Lanjutan'],
+    ['Pelesit', 'Sorcerer / Wolf Seer', 'wolf', 'Utusan kawanan. Intai 1 pemain untuk tahu sama ada dia Tok Nujum atau Mak Dukun. Tok Nujum nampak dia BAIK.', 'y', 'y', 'y', 'Sederhana'],
+    ['Toyol', 'Roleblocker', 'wolf', 'Curi kuasa 1 pemain. Kuasa orang itu batal malam ini.', 'y', 'y', 'u', 'Lanjutan'],
+    ['Musuh Dalam Selimut', 'Traitor (ganti White Werewolf)', 'wolf', 'Pihak Harimau tapi tak bangun dan tak kenal kawanan. Tok Nujum nampak dia BAIK. Bila Harimau terakhir mati, dia jadi Harimau.', 'u', 'y', 'y', 'Sederhana'],
+    ['Si Luncai', 'Jester', 'solo', 'Menang serta-merta kalau diundi keluar waktu siang.', 'y', 'y', 'y', 'Asas'],
+    ['Pontianak', 'Serial Killer', 'solo', 'Bunuh 1 pemain setiap malam dan kebal serangan Harimau. Menang bila tinggal seorang.', 'y', 'y', 'y', 'Sederhana'],
+    ['Hantu Raya', 'Doppelgänger', 'solo', 'Malam 1 pilih tuan. Bila tuan mati, dia ambil alih watak tuannya.', 'y', 'y', 'y', 'Sederhana'],
+    ['Si Pendendam', 'Executioner', 'solo', 'App beri 1 sasaran dari pihak kampung. Menang kalau sasaran itu diundi keluar.', 'y', 'y', 'y', 'Sederhana']
+  ];
+  const FN = { good: 'Kampung', wolf: 'Harimau', solo: 'Solo' };
+  const C = { y: '<span class="chip y">Ya</span>', u: '<span class="chip u">Ubah</span>', n: '<span class="chip n">Tidak</span>' };
+  const body = document.getElementById('roleRows');
+  function render(f) {
+    const rows = R.filter((r) => f === 'all' || r[2] === f || (f === 'pp' && r[6] === 'y') || (f === 'asas' && r[7] === 'Asas'));
+    body.innerHTML = rows.map((r) => `<tr>
+      <td><b class="f-${r[2]}"><span class="dot" style="background:currentColor"></span>${r[0]}</b><small>${r[1]} · ${FN[r[2]]}</small></td>
+      <td>${r[3]}</td><td>${C[r[4]]}</td><td>${C[r[5]]}</td><td>${C[r[6]]}</td><td>${r[7]}</td></tr>`).join('');
+  }
+  document.getElementById('filters').addEventListener('click', (e) => {
+    const b = e.target.closest('button'); if (!b) return;
+    document.querySelectorAll('#filters button').forEach((x) => x.setAttribute('aria-pressed', x === b));
+    render(b.dataset.f);
+  });
+  render('all');
+})();
+</script>

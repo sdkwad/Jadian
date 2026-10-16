@@ -1,0 +1,11 @@
+{
+  "appId": "my.jadian.game",
+  "appName": "Jadian",
+  "webDir": "www",
+  "android": {
+    "backgroundColor": "#0b1121"
+  },
+  "server": {
+    "androidScheme": "https"
+  }
+}

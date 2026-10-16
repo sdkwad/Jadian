@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Jadian — Siapa Harimau Malam Ni?</title>
+<meta name="description" content="Jadian: permainan deduksi sosial ala kampung. Werewolf versi Malaysia." />
+<meta name="theme-color" content="#0b1121" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Jadian" />
+<link rel="manifest" href="manifest.webmanifest" />
+<link rel="icon" type="image/svg+xml" href="assets/icons/icon.svg" />
+<link rel="icon" type="image/png" sizes="192x192" href="assets/icons/icon-192.png" />
+<link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png" />
+<link rel="stylesheet" href="css/fonts.css" />
+<link rel="stylesheet" href="css/style.css" />
+</head><body>
+
+<div class="sky" aria-hidden="true"></div>
+<svg class="kampung" viewBox="0 0 400 90" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+  <path d="M0 80 Q100 71 200 77 T400 75 V90 H0Z"/>
+  <path d="M50 52 L78 34 L106 52 Z M57 52 h42 v14 h-42z M60 66 h3 v12 h-3z M76 66 h3 v12 h-3z M93 66 h3 v12 h-3z"/>
+  <path d="M248 56 L270 42 L292 56Z M254 56 h32 v11 h-32z M257 67 h2.5 v10 h-2.5z M281 67 h2.5 v10 h-2.5z"/>
+  <path d="M160 79 C162 62 158 47 163 32 l2 0 C161 47 165 62 164 79Z"/>
+  <path d="M164 32 C150 26 140 30 134 36 C146 30 156 31 164 33Z M164 32 C176 24 188 27 194 34 C182 29 172 30 164 33Z M164 32 C158 20 150 16 142 16 C152 20 158 25 163 32Z M164 32 C170 20 178 15 186 16 C176 20 170 25 165 32Z"/>
+  <path d="M332 79 C333 65 330 54 334 42 l1.8 0 C332 54 335 65 334.5 79Z"/>
+  <path d="M335 42 C324 37 316 40 311 45 C320 40 328 41 335 43Z M335 42 C345 36 354 38 359 44 C350 40 342 41 335 43Z M335 42 C330 33 324 30 318 30 C326 33 330 37 334 42Z M335 42 C340 33 346 30 352 30 C345 33 341 37 336 42Z"/>
+  <rect class="win" x="72" y="55" width="8" height="6" rx="1"/>
+  <rect class="win" x="267" y="59" width="6" height="5" rx="1"/>
+</svg>
+
+<div class="app">
+  <header class="topbar" id="topbar">
+    <div class="brand">
+      <div class="brand-mark" aria-hidden="true"><svg class="j-svg" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="16" cy="16" r="13" fill="#e2b04a" stroke="#0b1121" stroke-width="2"/><path d="M16 3a13 13 0 0 1 0 26Z" fill="#18223d"/><path d="M6 12c2-4 6-6 10-6v6H6Z" fill="#f4efe2" stroke="#0b1121" stroke-width="1.8" stroke-linejoin="round"/><path d="M7 12c1 7 4 12 9 14V12H7Z" fill="#d9a16c" stroke="#0b1121" stroke-width="1.8" stroke-linejoin="round"/><circle cx="11.5" cy="17" r="1.5" fill="#0b1121"/><path d="M16 6c5 0 9 3 10 8 1 6-3 11-10 12V6Z" fill="#f08a3c" stroke="#0b1121" stroke-width="1.8" stroke-linejoin="round"/><path d="M22 7l3-3v5M21 11l4 1M22 15l4 1M20 22l4 2" stroke="#0b1121" stroke-width="2" stroke-linecap="round"/><polygon points="18,15 24,13 22,18" fill="#e2b04a" stroke="#0b1121" stroke-width="1.4" stroke-linejoin="round"/><polygon points="16,22 19,22 18,26" fill="#f4efe2" stroke="#0b1121" stroke-width="1.3" stroke-linejoin="round"/><line x1="16" y1="3" x2="16" y2="29" stroke="#0b1121" stroke-width="2"/></svg></div>
+      <div><div class="brand-name">JADIAN</div><div class="brand-sub">Siapa harimau malam ni?</div></div>
+    </div>
+    <button class="btn btn-ghost icon-btn" id="soundTop" onclick="window.toggleSound()" aria-label="Bunyi"></button>
+  </header>
+
+  <!-- ==================== UTAMA ==================== -->
+  <section class="page" id="pg_home">
+    <div class="hero">
+      <div class="hero-body">
+        <div class="moon" aria-hidden="true"><svg class="j-svg" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="16" cy="16" r="13" fill="#e2b04a" stroke="#0b1121" stroke-width="2"/><path d="M16 3a13 13 0 0 1 0 26Z" fill="#18223d"/><path d="M6 12c2-4 6-6 10-6v6H6Z" fill="#f4efe2" stroke="#0b1121" stroke-width="1.8" stroke-linejoin="round"/><path d="M7 12c1 7 4 12 9 14V12H7Z" fill="#d9a16c" stroke="#0b1121" stroke-width="1.8" stroke-linejoin="round"/><circle cx="11.5" cy="17" r="1.5" fill="#0b1121"/><path d="M16 6c5 0 9 3 10 8 1 6-3 11-10 12V6Z" fill="#f08a3c" stroke="#0b1121" stroke-width="1.8" stroke-linejoin="round"/><path d="M22 7l3-3v5M21 11l4 1M22 15l4 1M20 22l4 2" stroke="#0b1121" stroke-width="2" stroke-linecap="round"/><polygon points="18,15 24,13 22,18" fill="#e2b04a" stroke="#0b1121" stroke-width="1.4" stroke-linejoin="round"/><polygon points="16,22 19,22 18,26" fill="#f4efe2" stroke="#0b1121" stroke-width="1.3" stroke-linejoin="round"/><line x1="16" y1="3" x2="16" y2="29" stroke="#0b1121" stroke-width="2"/></svg></div>
+        <span class="eyebrow emas">Permainan deduksi ala kampung</span>
+        <h1>JADI<span>AN</span></h1>
+        <p class="tagline">Siapa harimau malam ni?</p>
+        <p>Siang jadi orang, malam jadi harimau. Kumpul geng, cari Harimau Jadian sebelum kampung habis diserbu.</p>
+      </div>
+      <div class="songket" aria-hidden="true"></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h2>Persediaan</h2><button class="linkish" onclick="window.openHowTo()">Cara main ›</button></div>
+      <div class="setup-rows" id="setupRows"></div>
+    </div>
+    <div class="card">
+      <div class="card-head"><h2>Mod permainan</h2><span class="tag" id="modeTag"></span></div>
+      <div class="modes" id="modeList"></div>
+      <p class="mode-desc" id="modeDesc"></p>
+    </div>
+    <div class="card">
+      <div class="card-head"><h2>Kad dalam dek</h2><button class="linkish" onclick="window.go('roles')">Ubah ›</button></div>
+      <div class="deck" id="homeDeck"></div>
+    </div>
+    <button class="btn btn-emas btn-block" id="homeStart" onclick="window.startGame()">Mula</button>
+  </section>
+
+  <!-- ==================== PEMAIN ==================== -->
+  <section class="page" id="pg_players" hidden>
+    <div class="pagehead"><span class="eyebrow emas">Orang kampung</span><h1>Pemain</h1><p>Tambah 4 hingga 20 orang. Simpan geng yang selalu main, lain kali tekan sekali je.</p></div>
+    <div class="card">
+      <div class="card-head"><h2>Senarai semasa</h2><span class="tag" id="pCount">0 pemain</span></div>
+      <form class="addrow" onsubmit="event.preventDefault(); window.addPlayer();">
+        <input id="newPlayerInput" class="input" placeholder="Nama pemain" maxlength="20" autocomplete="off" />
+        <button class="btn btn-emas" type="submit">Tambah</button>
+      </form>
+      <div id="playerList"></div>
+      <div class="btn-row" id="playerTools">
+        <button class="btn btn-ghost btn-sm" onclick="window.toggleSaveForm()">Simpan senarai ini</button>
+        <button class="btn btn-ghost btn-sm" onclick="window.clearAllPlayers()">Kosongkan</button>
+      </div>
+      <form id="saveFormBox" class="addrow" hidden onsubmit="event.preventDefault(); window.saveCurrentToNewGroup();">
+        <input id="saveGroupNameInput" class="input" placeholder="Nama senarai, cth: Geng Lepak" maxlength="30" autocomplete="off" />
+        <button class="btn btn-pandan" type="submit">Simpan</button>
+      </form>
+    </div>
+    <div class="card">
+      <div class="card-head"><h2>Senarai tersimpan</h2><span class="tag" id="gCount">0</span></div>
+      <div class="groups" id="savedGroupsList"></div>
+    </div>
+  </section>
+
+  <!-- ==================== WATAK ==================== -->
+  <section class="page" id="pg_roles" hidden>
+    <div class="pagehead"><span class="eyebrow emas">Kad watak</span><h1>Watak</h1><p>Auto-Balance pilih kad ikut bilangan pemain. Manual Bebas biar kau susun sendiri. Ketik nama watak untuk baca penuh.</p></div>
+    <div class="card">
+      <div class="seg" role="group" aria-label="Cara susun watak">
+        <button id="tabAuto" onclick="window.setBalanceMode('auto')">Auto-Balance</button>
+        <button id="tabManual" onclick="window.setBalanceMode('manual')">Manual Bebas</button>
+      </div>
+      <div class="presets" id="presetBar">
+        <button class="preset" id="pb_santai" onclick="window.setAutoPreset('santai')"><b>Santai</b><small>Watak asas</small></button>
+        <button class="preset" id="pb_kecoh" onclick="window.setAutoPreset('kecoh')"><b>Kecoh</b><small>Mindgame &amp; solo</small></button>
+        <button class="preset" id="pb_ganas" onclick="window.setAutoPreset('ganas')"><b>Ganas</b><small>Banyak pembunuh</small></button>
+      </div>
+      <div class="balance">
+        <div class="balance-top"><span id="totLbl">0 / 0 kad</span><span id="scoreLbl" class="tag">Tiada pemain</span></div>
+        <div class="meter"><i style="background:var(--pandan)" id="mGood"></i><i style="background:var(--ungu)" id="mSolo"></i><i style="background:var(--belang)" id="mBad"></i></div>
+        <div class="legend">
+          <span style="--c:var(--pandan)" id="goodLbl">Kampung 0</span>
+          <span style="--c:var(--belang)" id="badLbl">Harimau 0</span>
+          <span style="--c:var(--ungu)" id="soloLbl">Solo 0</span>
+        </div>
+      </div>
+      <div class="notes" id="diagBox"></div>
+    </div>
+    <div class="card" id="roleList"></div>
+  </section>
+
+  <!-- ==================== TETAPAN ==================== -->
+  <section class="page" id="pg_settings" hidden>
+    <div class="pagehead"><span class="eyebrow emas">Adat kampung</span><h1>Tetapan</h1><p>Peraturan rumah, ciri permainan dan masa. Tetapan ini diingat pada peranti ini.</p></div>
+    <div class="card"><div class="card-head"><h2>Ciri permainan</h2></div><div id="featuresBox"></div></div>
+    <div class="card"><div class="card-head"><h2>Peraturan watak</h2></div><div id="rulesBox"></div></div>
+    <div class="card">
+      <div class="card-head"><h2>Undian &amp; masa</h2></div>
+      <div class="field"><label for="selVoteMode">Cara undian</label>
+        <select id="selVoteMode" class="input" onchange="window.setPref('voteMode', this.value)">
+          <option value="mahkamah">Mahkamah Kampung (tuduh, bela diri, kira undi)</option>
+          <option value="pantas">Undian Pantas (pilih terus siapa dihalau)</option>
+        </select></div>
+      <div class="grid2">
+        <div class="field"><label for="selDiscuss">Mesyuarat siang</label>
+          <select id="selDiscuss" class="input" onchange="window.setPref('disc', this.value)">
+            <option value="60">1 minit</option><option value="120">2 minit</option><option value="180">3 minit</option><option value="300">5 minit</option><option value="auto">Auto (30 saat × pemain)</option>
+          </select></div>
+        <div class="field"><label for="selVote">Undian / bela diri</label>
+          <select id="selVote" class="input" onchange="window.setPref('vote', this.value)">
+            <option value="30">30 saat</option><option value="45">45 saat</option><option value="60">60 saat</option><option value="90">90 saat</option>
+          </select></div>
+      </div>
+      <div class="field"><label for="selHold">Masa minimum setiap giliran Pass &amp; Play</label>
+        <select id="selHold" class="input" onchange="window.setPref('hold', this.value)">
+          <option value="0">Tiada</option><option value="4">4 saat</option><option value="6">6 saat</option><option value="8">8 saat</option>
+        </select></div>
+    </div>
+    <div class="card">
+      <div class="set-row"><div><b>Bunyi</b><small>Bunyi klik, pagi dan amaran masa tamat.</small></div>
+        <label class="switch"><input type="checkbox" id="rSound" onchange="window.toggleSound()" aria-label="Bunyi" /><span class="track"></span></label></div>
+    </div>
+  </section>
+
+  <!-- ==================== PERMAINAN ==================== -->
+  <section class="page" id="pg_game" hidden>
+    <div class="gbar">
+      <button class="btn btn-ghost icon-btn" onclick="window.exitGame()" aria-label="Keluar permainan">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+      <div class="gtitle"><div class="eyebrow emas" id="gEyebrow">Malam 1</div><div class="gname" id="gTitle">Malam</div></div>
+      <button class="btn btn-ghost btn-sm" id="undoBtn" onclick="window.undoLastStep()">↶ Undo</button>
+      <button class="btn btn-ghost btn-sm" id="noteBtn" onclick="window.toggleNotes()">Nota</button>
+    </div>
+    <div class="gprogress" id="gProgress" hidden></div>
+    <div class="card" id="notesCard" hidden>
+      <div class="card-head"><h2>Buku nota</h2><button class="linkish" onclick="window.toggleNotes()">Tutup</button></div>
+      <div class="list" id="noteList"></div>
+    </div>
+    <div class="card stage" id="stage"></div>
+  </section>
+
+  <!-- ==================== KAD PEMAIN (dibuka dari QR) ==================== -->
+  <section class="page" id="pg_card" hidden>
+    <div class="brand" style="justify-content:center;padding-block:4px 6px;">
+      <div class="brand-mark" aria-hidden="true"><svg class="j-svg" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="16" cy="16" r="13" fill="#e2b04a" stroke="#0b1121" stroke-width="2"/><path d="M16 3a13 13 0 0 1 0 26Z" fill="#18223d"/><path d="M6 12c2-4 6-6 10-6v6H6Z" fill="#f4efe2" stroke="#0b1121" stroke-width="1.8" stroke-linejoin="round"/><path d="M7 12c1 7 4 12 9 14V12H7Z" fill="#d9a16c" stroke="#0b1121" stroke-width="1.8" stroke-linejoin="round"/><circle cx="11.5" cy="17" r="1.5" fill="#0b1121"/><path d="M16 6c5 0 9 3 10 8 1 6-3 11-10 12V6Z" fill="#f08a3c" stroke="#0b1121" stroke-width="1.8" stroke-linejoin="round"/><path d="M22 7l3-3v5M21 11l4 1M22 15l4 1M20 22l4 2" stroke="#0b1121" stroke-width="2" stroke-linecap="round"/><polygon points="18,15 24,13 22,18" fill="#e2b04a" stroke="#0b1121" stroke-width="1.4" stroke-linejoin="round"/><polygon points="16,22 19,22 18,26" fill="#f4efe2" stroke="#0b1121" stroke-width="1.3" stroke-linejoin="round"/><line x1="16" y1="3" x2="16" y2="29" stroke="#0b1121" stroke-width="2"/></svg></div>
+      <div><div class="brand-name">JADIAN</div><div class="brand-sub">Kad watak kau</div></div>
+    </div>
+    <div class="card stage" id="cardStage"></div>
+  </section>
+</div>
+
+<nav class="tabbar" id="tabbar" aria-label="Menu utama">
+  <div class="tabbar-inner">
+    <button class="tab" data-pg="home" onclick="window.go('home')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="M3 11l9-7 9 7M5 10v10h5v-5h4v5h5V10"/></svg>Utama</button>
+    <button class="tab" data-pg="players" onclick="window.go('players')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c.8-3.6 3.4-5.5 6.5-5.5s5.7 1.9 6.5 5.5"/><circle cx="17" cy="9" r="2.6"/><path d="M16.5 14.6c2.6.1 4.4 1.8 5 4.6"/></svg>Pemain<span class="count" id="tabCount" hidden></span></button>
+    <button class="tab-play" id="tabPlay" onclick="window.startGame()" aria-label="Mula permainan"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13a1 1 0 0 0 1.5.86l10.4-6.5a1 1 0 0 0 0-1.72L9.5 4.64A1 1 0 0 0 8 5.5z"/></svg></button>
+    <button class="tab" data-pg="roles" onclick="window.go('roles')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="5" width="11" height="15" rx="2" transform="rotate(-8 8.5 12.5)"/><rect x="10" y="4" width="11" height="15" rx="2" transform="rotate(8 15.5 11.5)"/></svg>Watak</button>
+    <button class="tab" data-pg="settings" onclick="window.go('settings')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2.2"/><circle cx="10" cy="17" r="2.2"/></svg>Tetapan</button>
+  </div>
+</nav>
+
+<div class="sheet-back" id="sheet" hidden onclick="if(event.target===this) window.closeSheet()">
+  <div class="sheet" role="dialog" aria-modal="true"><div class="sheet-grip"></div><div class="sheet-content" id="sheetContent"></div></div>
+</div>
+<div class="modal-back" id="modal" hidden onclick="if(event.target===this) window.modalClose(false)">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="mTitle">
+    <h3 id="mTitle"></h3><p id="mBody"></p>
+    <div class="btn-row" style="margin-top:6px;"><button class="btn btn-ghost" onclick="window.modalClose(false)">Batal</button><button class="btn btn-emas" id="mOk" onclick="window.modalClose(true)">Ya</button></div>
+  </div>
+</div>
+<div class="toast" id="toast" hidden role="status"></div>
+
+<script src="vendor/qrcode.min.js"></script>
+<script src="js/config.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
