@@ -3,6 +3,6 @@
    QR dalam versi APK akan menghala ke alamat ini, sebab telefon kawan tak boleh buka "localhost" dalam APK kau.
    Tukar nilai ini selepas kau dapat URL dari GitHub Pages, Vercel atau Netlify, kemudian bina semula APK. */
 window.JADIAN_CONFIG = {
-  publicUrl: 'https://GANTI-DENGAN-URL-KAU.vercel.app/',
-  version: '1.0.0'
+  publicUrl: 'https://jadian-hazel.vercel.app/',
+  version: '1.0.1'
 };
