@@ -189,20 +189,47 @@
   // Semua bunyi lalu js/audio.js (pengurus bunyi hibrid). beep() kekal sebagai nama pendek untuk bunyi sintesis UI.
   const SND = window.JadianAudio || { unlock() {}, setEnabled() {}, sfx() {}, ambience() {}, night() {}, morning() {}, win() {} };
   function beep(t) { if (soundOn) SND.sfx(t || 'click'); }
-  // Bunyi peralihan fasa (Kategori A): dipanggil setiap kali pentas dilukis, tapi hanya berbunyi bila fasa betul-betul bertukar.
-  function phaseAudio() {
+  // Peralihan fasa: scene siang/malam 4–5 saat + bunyi suasana (Kategori A). Dipanggil setiap kali pentas dilukis,
+  // tapi hanya bertindak bila fasa betul-betul bertukar. Pentas baharu dilukis di belakang scene, jadi aliran game tak berubah.
+  function phaseFx() {
     const P = game ? game.phase : null;
     const key = game ? `${P}:${game.night}` : null, quiet = audioQuiet;
     audioQuiet = false;
     if (key === audioKey) return;
     audioKey = key;
     SND.ambience(!!game && (P === 'night' || (P === 'hunter' && game.hunterNext === 'morning')));
-    if (quiet) return; // Undo: kemas kini gelung sahaja, jangan ulang bunyi peralihan.
-    if (!soundOn || !game) return;
-    if (P === 'night') SND.night();
-    else if (P === 'morning') SND.morning(!!(game.summary && game.summary.dead.length));
-    else if (P === 'over') SND.win(game.winner && game.winner.f);
+    if (!game) { endScene(true); return; }
+    if (quiet) return; // Undo: kemas kini gelung sahaja, jangan ulang scene atau bunyi peralihan.
+    if (P === 'night') { playScene('malam', game.night); if (soundOn) SND.night(); }
+    else if (P === 'morning') {
+      const danger = !!(game.summary && game.summary.dead.length);
+      playScene(danger ? 'bahaya' : 'pagi', game.night); if (soundOn) SND.morning(danger);
+    } else if (P === 'over' && soundOn) SND.win(game.winner && game.winner.f);
   }
+  const SCENES = {
+    malam: (n) => ({ cls: 'malam', ms: 4600, e: `Malam ${n}`, t: n > 1 ? 'Malam menjelma lagi…' : 'Malam pun tiba…', s: 'Semua orang kampung, tutup mata.' }),
+    pagi: (n) => ({ cls: 'pagi', ms: 4000, e: `Pagi Hari ${n}`, t: 'Kukuruyuk!', s: 'Semua orang kampung, buka mata.' }),
+    bahaya: (n) => ({ cls: 'pagi bahaya', ms: 4200, e: `Pagi Hari ${n}`, t: 'Kentung dipalu!', s: 'Ada sesuatu berlaku malam tadi…' })
+  };
+  let sceneT = null, sceneAt = 0;
+  function playScene(k, n) {
+    const c = SCENES[k](n), el = $('scene');
+    clearTimeout(sceneT);
+    $('scEyebrow').textContent = c.e; $('scTitle').textContent = c.t; $('scSub').textContent = c.s;
+    // Buang .go dan paksa reflow supaya animasi bermula semula walaupun scene yang sama dimain berturut-turut.
+    el.className = 'scene ' + c.cls; el.hidden = false; void el.offsetWidth; el.classList.add('go');
+    sceneAt = Date.now();
+    const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    sceneT = setTimeout(endScene, reduce ? 1800 : c.ms);
+  }
+  function endScene(now) {
+    clearTimeout(sceneT);
+    const el = $('scene'); if (el.hidden) return;
+    if (now === true) { el.hidden = true; return; }
+    el.classList.add('out'); sceneT = setTimeout(() => { el.hidden = true; }, 300);
+  }
+  // Ketikan yang mencetuskan peralihan tak boleh terus melangkau scene.
+  window.skipScene = function () { if (Date.now() - sceneAt > 600) endScene(); };
   function toast(msg) {
     const t = $('toast'); t.textContent = msg; t.hidden = false;
     t.style.animation = 'none'; void t.offsetWidth; t.style.animation = '';
@@ -218,7 +245,7 @@
   window.closeSheet = function () { $('sheet').hidden = true; };
   document.addEventListener('keydown', (e) => {
     if (e.key !== 'Escape') return;
-    if (!$('modal').hidden) window.modalClose(false); else if (!$('sheet').hidden) window.closeSheet();
+    if (!$('scene').hidden) window.skipScene(); else if (!$('modal').hidden) window.modalClose(false); else if (!$('sheet').hidden) window.closeSheet();
   });
 
   const SPEAKER_ON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg>';
@@ -564,7 +591,7 @@
   };
   window.toggleNotes = function () { $('notesCard').hidden = !$('notesCard').hidden; };
   window.exitGame = function () {
-    const leave = () => { clearInterval(timerInt); clearInterval(minInt); window.holdEnd(); game = null; history = []; resetTemps(); phaseAudio(); document.body.classList.remove('day'); window.go('home'); };
+    const leave = () => { clearInterval(timerInt); clearInterval(minInt); window.holdEnd(); game = null; history = []; resetTemps(); phaseFx(); document.body.classList.remove('day'); window.go('home'); };
     if (!game || game.phase === 'over') { leave(); return; }
     ask({ title: 'Tamatkan permainan?', body: 'Permainan yang sedang berjalan akan hilang. Senarai pemain dan tetapan kekal.', ok: 'Tamatkan', danger: true, onOk: leave });
   };
@@ -745,7 +772,7 @@
 
   function renderStage() {
     if (!game) return;
-    applyTheme(); phaseAudio();
+    applyTheme(); phaseFx();
     $('undoBtn').disabled = !undoAllowed();
     $('gProgress').hidden = true;
     renderNotes();

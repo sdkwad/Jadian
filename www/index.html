@@ -202,6 +202,25 @@
   </div>
 </div>
 <div class="toast" id="toast" hidden role="status"></div>
+<!-- Scene peralihan siang/malam: 4–5 saat, main sebelum giliran pertama. Ketik untuk langkau. -->
+<div class="scene" id="scene" hidden onclick="window.skipScene()">
+  <div class="sc-sky"></div><div class="sc-sky2"></div><div class="sc-stars"></div><div class="sc-flash"></div>
+  <div class="sc-sun"></div><div class="sc-moon"></div>
+  <div class="sc-eyes" aria-hidden="true"><i></i><i></i></div>
+  <svg class="sc-kampung" viewBox="0 0 400 90" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+    <path d="M0 80 Q100 71 200 77 T400 75 V90 H0Z"/>
+    <path d="M50 52 L78 34 L106 52 Z M57 52 h42 v14 h-42z M60 66 h3 v12 h-3z M76 66 h3 v12 h-3z M93 66 h3 v12 h-3z"/>
+    <path d="M248 56 L270 42 L292 56Z M254 56 h32 v11 h-32z M257 67 h2.5 v10 h-2.5z M281 67 h2.5 v10 h-2.5z"/>
+    <path d="M160 79 C162 62 158 47 163 32 l2 0 C161 47 165 62 164 79Z"/>
+    <path d="M164 32 C150 26 140 30 134 36 C146 30 156 31 164 33Z M164 32 C176 24 188 27 194 34 C182 29 172 30 164 33Z M164 32 C158 20 150 16 142 16 C152 20 158 25 163 32Z M164 32 C170 20 178 15 186 16 C176 20 170 25 165 32Z"/>
+    <path d="M332 79 C333 65 330 54 334 42 l1.8 0 C332 54 335 65 334.5 79Z"/>
+    <path d="M335 42 C324 37 316 40 311 45 C320 40 328 41 335 43Z M335 42 C345 36 354 38 359 44 C350 40 342 41 335 43Z M335 42 C330 33 324 30 318 30 C326 33 330 37 334 42Z M335 42 C340 33 346 30 352 30 C345 33 341 37 336 42Z"/>
+    <rect class="win" x="72" y="55" width="8" height="6" rx="1"/>
+    <rect class="win" x="267" y="59" width="6" height="5" rx="1"/>
+  </svg>
+  <div class="sc-text" role="status"><span class="sc-eyebrow" id="scEyebrow"></span><h2 id="scTitle"></h2><p id="scSub"></p></div>
+  <small class="sc-skip">Ketik untuk langkau</small>
+</div>
 
 <script src="vendor/qrcode.min.js"></script>
 <script src="js/config.js"></script>
