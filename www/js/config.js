@@ -4,5 +4,5 @@
    Tukar nilai ini selepas kau dapat URL dari GitHub Pages, Vercel atau Netlify, kemudian bina semula APK. */
 window.JADIAN_CONFIG = {
   publicUrl: 'https://jadian-hazel.vercel.app/',
-  version: '1.1.1'
+  version: '1.1.2'
 };

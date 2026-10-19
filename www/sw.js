@@ -1,6 +1,6 @@
 /* Service worker Jadian: simpan semua fail app dalam cache supaya game boleh dibuka tanpa internet.
    Bila kau kemas kini app, NAIKKAN nombor VERSION di bawah supaya telefon pemain ambil fail baru. */
-const VERSION = 'jadian-v1.1.1';
+const VERSION = 'jadian-v1.1.2';
 const FILES = [
   './',
   'index.html',
@@ -29,7 +29,8 @@ const FILES = [
 ];
 
 self.addEventListener('install', (e) => {
-  e.waitUntil(caches.open(VERSION).then((c) => c.addAll(FILES)).then(() => self.skipWaiting()));
+  // cache: 'reload' = langkau cache HTTP pelayar, supaya versi baharu betul-betul ambil fail baharu dari pelayan.
+  e.waitUntil(caches.open(VERSION).then((c) => c.addAll(FILES.map((f) => new Request(f, { cache: 'reload' })))).then(() => self.skipWaiting()));
 });
 
 self.addEventListener('activate', (e) => {

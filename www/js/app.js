@@ -590,8 +590,13 @@
     renderStage();
   };
   window.toggleNotes = function () { $('notesCard').hidden = !$('notesCard').hidden; };
+  let updateWaiting = false, reloading = false;
+  function applyUpdate() {
+    if (game) { updateWaiting = true; return; }
+    if (!reloading) { reloading = true; location.reload(); }
+  }
   window.exitGame = function () {
-    const leave = () => { clearInterval(timerInt); clearInterval(minInt); window.holdEnd(); game = null; history = []; resetTemps(); phaseFx(); document.body.classList.remove('day'); window.go('home'); };
+    const leave = () => { clearInterval(timerInt); clearInterval(minInt); window.holdEnd(); game = null; history = []; resetTemps(); phaseFx(); document.body.classList.remove('day'); window.go('home'); if (updateWaiting) applyUpdate(); };
     if (!game || game.phase === 'over') { leave(); return; }
     ask({ title: 'Tamatkan permainan?', body: 'Permainan yang sedang berjalan akan hilang. Senarai pemain dan tetapan kekal.', ok: 'Tamatkan', danger: true, onOk: leave });
   };
@@ -1615,8 +1620,20 @@
   window.addEventListener('hashchange', () => { if (!game) boot(); });
   boot();
 
+  $('appVer').textContent = `Jadian versi ${(window.JADIAN_CONFIG && window.JADIAN_CONFIG.version) || ''}`;
+
   // PWA: daftar service worker supaya app boleh dipasang di skrin utama dan jalan tanpa internet.
+  // Bila versi baharu dipasang, service worker baharu ambil alih halaman: muat semula sekali supaya fail baharu terus dipakai
+  // (tanpa ini, pemain perlu buka app dua kali). Permainan yang sedang berjalan tak diganggu: tunggu sampai keluar ke menu.
   if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
-    window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => {}); });
+    const hadSW = !!navigator.serviceWorker.controller;
+    navigator.serviceWorker.addEventListener('controllerchange', () => { if (hadSW) applyUpdate(); });
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('sw.js').then((reg) => {
+        // Semak versi baharu setiap kali app dibuka, dan setiap kali ia kembali dari latar belakang.
+        reg.update().catch(() => {});
+        document.addEventListener('visibilitychange', () => { if (!document.hidden) reg.update().catch(() => {}); });
+      }).catch(() => {});
+    });
   }
 })();
