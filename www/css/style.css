@@ -233,9 +233,9 @@
   .tab-play:disabled { background: var(--surface-3); color: var(--kabur); box-shadow: none; cursor: not-allowed; }
 
   /* ---------- Permainan ---------- */
-  .gbar { display: flex; align-items: center; gap: 8px; }
+  .gbar { display: flex; align-items: center; gap: 6px; }
   .gtitle { flex: 1; min-width: 0; }
-  .gname { font-family: var(--f-display); font-size: 24px; line-height: 1.05; letter-spacing: .02em; text-wrap: balance; }
+  .gname { font-family: var(--f-display); font-size: clamp(19px, 5.6vw, 24px); line-height: 1.05; letter-spacing: .02em; text-wrap: balance; }
   .gprogress { display: flex; flex-direction: column; gap: 6px; }
   .gprogress small { color: var(--kabur); font-size: 12px; font-weight: 700; }
   .steps { display: flex; gap: 4px; }

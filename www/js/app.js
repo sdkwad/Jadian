@@ -135,7 +135,7 @@
   const isPack = (p) => !!(p && p.role && ROLES[p.role].pack);
   const INFO = ['tok_nujum', 'pak_belalang', 'pelesit', 'mak_cik_bawang'];
 
-  let soundOn = true, actx = null, timerInt = null, holdT = null, remSec = 0, timerTotal = 0, minInt = null, minUntil = 0, flipNext = false;
+  let soundOn = true, audioKey = null, audioQuiet = false, curPg = null, timerInt = null, holdT = null, remSec = 0, timerTotal = 0, minInt = null, minUntil = 0, flipNext = false;
   let tempTargetId = null, tempTargets = [], tempDukun = { save: null, poison: null }, tempBite = false, tempQR = false, seerDone = false;
   let history = [], game = null, editingGroupId = null, modalOk = null, toastT = null;
 
@@ -186,21 +186,22 @@
   }
 
   /* ==================== BUNYI, TOAST, MODAL, SHEET ==================== */
-  // AudioContext disediakan pada sentuhan pertama supaya bunyi pertama tak menyebabkan skrin tersekat.
-  function warmAudio() { if (soundOn && !actx) { try { actx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) {} } }
-  document.addEventListener('pointerdown', warmAudio, { once: true });
-  function beep(t) {
-    if (!soundOn) return;
-    try {
-      warmAudio(); if (!actx) return;
-      const seq = { click: [[480, .05]], morning: [[523, .12], [659, .12], [784, .2]], night: [[392, .16], [294, .28]],
-        win: [[523, .12], [659, .12], [784, .12], [1046, .32]], alarm: [[880, .14], [0, .08], [880, .14], [0, .08], [880, .26]] }[t] || [[480, .05]];
-      let at = actx.currentTime;
-      seq.forEach(([f, d]) => {
-        if (f) { const o = actx.createOscillator(), g = actx.createGain(); o.type = 'triangle'; o.frequency.setValueAtTime(f, at); g.gain.setValueAtTime(.09, at); g.gain.exponentialRampToValueAtTime(.001, at + d); o.connect(g); g.connect(actx.destination); o.start(at); o.stop(at + d); }
-        at += d;
-      });
-    } catch (e) {}
+  // Semua bunyi lalu js/audio.js (pengurus bunyi hibrid). beep() kekal sebagai nama pendek untuk bunyi sintesis UI.
+  const SND = window.JadianAudio || { unlock() {}, setEnabled() {}, sfx() {}, ambience() {}, night() {}, morning() {}, win() {} };
+  function beep(t) { if (soundOn) SND.sfx(t || 'click'); }
+  // Bunyi peralihan fasa (Kategori A): dipanggil setiap kali pentas dilukis, tapi hanya berbunyi bila fasa betul-betul bertukar.
+  function phaseAudio() {
+    const P = game ? game.phase : null;
+    const key = game ? `${P}:${game.night}` : null, quiet = audioQuiet;
+    audioQuiet = false;
+    if (key === audioKey) return;
+    audioKey = key;
+    SND.ambience(!!game && (P === 'night' || (P === 'hunter' && game.hunterNext === 'morning')));
+    if (quiet) return; // Undo: kemas kini gelung sahaja, jangan ulang bunyi peralihan.
+    if (!soundOn || !game) return;
+    if (P === 'night') SND.night();
+    else if (P === 'morning') SND.morning(!!(game.summary && game.summary.dead.length));
+    else if (P === 'over') SND.win(game.winner && game.winner.f);
   }
   function toast(msg) {
     const t = $('toast'); t.textContent = msg; t.hidden = false;
@@ -222,10 +223,9 @@
 
   const SPEAKER_ON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16.5 8.5a5 5 0 0 1 0 7M19 6a8.5 8.5 0 0 1 0 12"/></svg>';
   const SPEAKER_OFF = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M17 9l5 6M22 9l-5 6"/></svg>';
-  window.toggleSound = function () { soundOn = !soundOn; savePrefs(); renderSoundUI(); beep('click'); };
+  window.toggleSound = function () { soundOn = !soundOn; SND.setEnabled(soundOn, true); savePrefs(); renderSoundUI(); beep('click'); };
   function renderSoundUI() {
-    $('soundTop').innerHTML = soundOn ? SPEAKER_ON : SPEAKER_OFF;
-    $('soundTop').setAttribute('aria-label', soundOn ? 'Matikan bunyi' : 'Hidupkan bunyi');
+    ['soundTop', 'soundGame'].forEach((id) => { $(id).innerHTML = soundOn ? SPEAKER_ON : SPEAKER_OFF; $(id).setAttribute('aria-label', soundOn ? 'Matikan bunyi' : 'Hidupkan bunyi'); });
     $('rSound').checked = soundOn;
   }
 
@@ -264,6 +264,8 @@
   /* ==================== NAVIGASI ==================== */
   window.go = function (pg) {
     if (game) return;
+    if (curPg && pg !== curPg) beep('tab');
+    curPg = pg;
     ['home', 'players', 'roles', 'settings', 'game'].forEach((k) => { const el = $('pg_' + k); el.hidden = k !== pg; el.classList.toggle('enter', k === pg); });
     document.querySelectorAll('.tab').forEach((t) => { if (t.dataset.pg === pg) t.setAttribute('aria-current', 'page'); else t.removeAttribute('aria-current'); });
     $('tabbar').hidden = false; $('topbar').hidden = false;
@@ -302,11 +304,11 @@
     if (!setup.players.length) return;
     const inp = $('saveGroupNameInput'), title = inp.value.trim() || ('Kumpulan ' + (savedGroups.length + 1));
     savedGroups.unshift({ id: Date.now(), title, players: JSON.parse(JSON.stringify(setup.players)) });
-    saveGroups(); inp.value = ''; $('saveFormBox').hidden = true; beep('morning'); toast(`Disimpan sebagai "${title}".`); renderSetup();
+    saveGroups(); inp.value = ''; $('saveFormBox').hidden = true; beep('success'); toast(`Disimpan sebagai "${title}".`); renderSetup();
   };
   window.loadGroupById = function (gid) {
     const grp = savedGroups.find((g) => g.id === gid); if (!grp) return;
-    beep('morning'); setup.players = JSON.parse(JSON.stringify(grp.players)).slice(0, 20);
+    beep('success'); setup.players = JSON.parse(JSON.stringify(grp.players)).slice(0, 20);
     rebalance(); renderSetup(); toast(`"${grp.title}" dimuatkan: ${setup.players.length} pemain.`);
   };
   window.startRenameGroup = function (gid) { editingGroupId = gid; renderGroups(); const i = $('renameInp_' + gid); if (i) { i.focus(); i.select(); } };
@@ -507,7 +509,7 @@
       else { toast('Susunan kad belum lengkap.'); window.go('roles'); }
       return;
     }
-    beep('night');
+    beep('flip'); audioKey = null;
     const deck = [];
     IDS.forEach((k) => { for (let i = 0; i < setup.rc[k]; i++) deck.push(k); });
     for (let i = deck.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [deck[i], deck[j]] = [deck[j], deck[i]]; }
@@ -548,7 +550,7 @@
   const undoAllowed = () => game && history.length > 0 && !(game.mode === 'pass_play' && game.phase === 'night');
   window.undoLastStep = function () {
     if (!undoAllowed()) return;
-    beep('click'); clearInterval(timerInt);
+    beep('click'); clearInterval(timerInt); audioQuiet = true;
     game = JSON.parse(history.pop()); resetTemps();
     if (game.phase === 'discuss') {
       let s = game.discTime === 'auto' ? alive().length * 30 : parseInt(game.discTime, 10);
@@ -562,7 +564,7 @@
   };
   window.toggleNotes = function () { $('notesCard').hidden = !$('notesCard').hidden; };
   window.exitGame = function () {
-    const leave = () => { clearInterval(timerInt); clearInterval(minInt); window.holdEnd(); game = null; history = []; resetTemps(); document.body.classList.remove('day'); window.go('home'); };
+    const leave = () => { clearInterval(timerInt); clearInterval(minInt); window.holdEnd(); game = null; history = []; resetTemps(); phaseAudio(); document.body.classList.remove('day'); window.go('home'); };
     if (!game || game.phase === 'over') { leave(); return; }
     ask({ title: 'Tamatkan permainan?', body: 'Permainan yang sedang berjalan akan hilang. Senarai pemain dan tetapan kekal.', ok: 'Tamatkan', danger: true, onOk: leave });
   };
@@ -581,7 +583,6 @@
     resetTemps();
     if (game.mode === 'pass_play') game.pp = { round: 'malam', idx: 0, open: false };
     else { game.steps = buildSteps(); game.stepIdx = 0; }
-    if (game.night > 1) beep('night');
     renderStage();
   }
 
@@ -744,7 +745,7 @@
 
   function renderStage() {
     if (!game) return;
-    applyTheme();
+    applyTheme(); phaseAudio();
     $('undoBtn').disabled = !undoAllowed();
     $('gProgress').hidden = true;
     renderNotes();
@@ -1090,7 +1091,7 @@
   }
   window.dukunSave = function (id) { beep('click'); tempDukun.save = tempDukun.save === id ? null : id; renderStage(); };
   window.dukunPoison = function (id) { beep('click'); tempDukun.poison = tempDukun.poison === id ? null : id; renderStage(); };
-  window.selectTarget = function (id) { beep('click'); tempTargetId = id; renderStage(); };
+  window.selectTarget = function (id) { beep(game.phase === 'vote' ? 'vote' : 'click'); tempTargetId = id; renderStage(); };
   window.toggleBite = function () { beep('click'); tempBite = !tempBite; renderStage(); };
   window.toggleMulti = function (id) {
     beep('click');
@@ -1243,7 +1244,7 @@
     if (e) e.preventDefault();
     const b = $('holdBtn'); if (!b) return;
     try { if (e && e.pointerId != null) b.setPointerCapture(e.pointerId); } catch (_) {}
-    warmAudio();
+    if (soundOn) SND.unlock();
     b.classList.add('holding');
     clearTimeout(holdT); holdT = setTimeout(unlockTurn, 650);
   };
@@ -1253,9 +1254,9 @@
     holdT = null;
     const buzz = () => { try { if (navigator.vibrate) navigator.vibrate(18); } catch (_) {} };
     // Kad pemain yang dibuka dari QR.
-    if (cardView && !cardView.open) { buzz(); cardView.open = true; flipNext = true; renderCardView(); beep('click'); return; }
+    if (cardView && !cardView.open) { buzz(); cardView.open = true; flipNext = true; renderCardView(); beep('flip'); return; }
     // "Lihat di sini" masa Agih Kad dalam mod Moderator.
-    if (game && game.phase === 'deal' && game.dealView && game.dealView.mode === 'lock') { buzz(); game.dealView.mode = 'open'; flipNext = true; renderStage(); beep('click'); return; }
+    if (game && game.phase === 'deal' && game.dealView && game.dealView.mode === 'lock') { buzz(); game.dealView.mode = 'open'; flipNext = true; renderStage(); beep('flip'); return; }
     if (!game || game.phase !== 'night' || game.mode !== 'pass_play' || game.pp.open) return;
     buzz();
     const cur = alive()[game.pp.idx];
@@ -1266,7 +1267,7 @@
     }
     armMin(game.pp.round === 'subuh' ? Math.min(4, game.holdSec) : game.holdSec);
     flipNext = true;
-    renderStage(); beep('click');
+    renderStage(); beep('flip');
   }
   // Tiada snap() dalam Pass & Play waktu malam: Undo dikunci supaya skrin pemain lain tak boleh dibuka semula.
   window.completePPTurn = function () {
@@ -1390,7 +1391,7 @@
   }
 
   window.confirmHunterShot = function (skip) {
-    snap(); beep('click');
+    snap(); beep(skip ? 'click' : 'accuse');
     const h = gp(game.hunters.shift()), v = skip ? null : gp(tempTargetId);
     tempTargetId = null;
     if (v && v.alive) { game.logs.push(`🏹 Pemburu (${esc(h.name)}) menembak mati ${esc(v.name)}.`); kill(v, 'pemburu'); }
@@ -1406,9 +1407,9 @@
     const w = checkWin(); if (w) { endWith(w); return; }
     game.event = null;
     if (game.rules.events && Math.random() < .4) { const ks = Object.keys(EVENTS); game.event = { id: ks[Math.floor(Math.random() * ks.length)] }; game.logs.push(`Pagi ${game.night}: Peristiwa kampung, ${EVENTS[game.event.id].n}.`); }
-    beep('morning'); game.phase = 'morning'; renderStage();
+    game.phase = 'morning'; renderStage();
   }
-  function endWith(w) { clearInterval(timerInt); game.winner = w; game.phase = 'over'; beep('win'); renderStage(); }
+  function endWith(w) { clearInterval(timerInt); game.winner = w; game.phase = 'over'; renderStage(); }
 
   /* ==================== MASA ==================== */
   const fmt = (s) => String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0');
@@ -1423,7 +1424,12 @@
   }
   function startTimer() {
     clearInterval(timerInt);
-    timerInt = setInterval(() => { if (remSec > 0) { remSec--; updateTimerUI(); if (remSec === 0) { beep('alarm'); clearInterval(timerInt); } } else clearInterval(timerInt); }, 1000);
+    timerInt = setInterval(() => {
+      if (remSec <= 0) { clearInterval(timerInt); return; }
+      remSec--; updateTimerUI();
+      // 10 saat terakhir: detik kayu perlahan, 5 saat terakhir: kentung mendesak, 0: kentung bertalu + gong.
+      if (remSec === 0) { beep('alarm'); clearInterval(timerInt); } else if (remSec <= 5) beep('tickUrgent'); else if (remSec <= 10) beep('tick');
+    }, 1000);
   }
   window.startDayDiscussion = function () {
     snap(); beep('click'); game.phase = 'discuss';
@@ -1435,7 +1441,7 @@
   };
   window.adjustTimerSeconds = function (d) { remSec = Math.max(0, remSec + d); if (remSec > timerTotal) timerTotal = remSec; updateTimerUI(); if (remSec > 0 && d > 0) startTimer(); };
   window.startDayVoting = function () {
-    snap(); beep('click'); clearInterval(timerInt); tempTargetId = null;
+    snap(); beep(game.voteMode === 'mahkamah' ? 'court' : 'vote'); clearInterval(timerInt); tempTargetId = null;
     if (game.voteMode === 'mahkamah') { game.court = { accused: [], idx: 0, counts: {}, ketuaVote: null, ghosts: {} }; game.phase = 'accuse'; renderStage(); return; }
     game.phase = 'vote'; remSec = timerTotal = game.voteTime; renderStage(); startTimer();
   };
@@ -1458,8 +1464,8 @@
   };
   window.claimKetua = function (id) {
     const p = gp(id); window.closeSheet();
-    if (p.role === 'ketua') { snap(); p.revealed = true; game.logs.push(`Siang ${game.night}: ${esc(p.name)} disahkan sebagai Ketua Kampung. Undinya dikira 2.`); beep('morning'); toast(`Sah! ${p.name} ialah Ketua Kampung. Undinya dikira 2.`); }
-    else { beep('alarm'); toast(`${p.name} BUKAN Ketua Kampung!`); }
+    if (p.role === 'ketua') { snap(); p.revealed = true; game.logs.push(`Siang ${game.night}: ${esc(p.name)} disahkan sebagai Ketua Kampung. Undinya dikira 2.`); beep('success'); toast(`Sah! ${p.name} ialah Ketua Kampung. Undinya dikira 2.`); }
+    else { beep('error'); toast(`${p.name} BUKAN Ketua Kampung!`); }
     renderStage();
   };
 
@@ -1508,20 +1514,20 @@
     return t;
   }
   window.toggleAccuse = function (id) {
-    beep('click'); const a = game.court.accused, i = a.indexOf(id);
-    if (i >= 0) a.splice(i, 1); else if (a.length < 3) a.push(id); else toast('Maksimum 3 tertuduh.');
+    const a = game.court.accused, i = a.indexOf(id);
+    if (i >= 0) { a.splice(i, 1); beep('click'); } else if (a.length < 3) { a.push(id); beep('accuse'); } else { beep('error'); toast('Maksimum 3 tertuduh.'); }
     renderStage();
   };
-  window.startDefense = function () { snap(); beep('click'); game.court.idx = 0; game.phase = 'defense'; remSec = timerTotal = game.voteTime; renderStage(); startTimer(); };
+  window.startDefense = function () { snap(); beep('defense'); game.court.idx = 0; game.phase = 'defense'; remSec = timerTotal = game.voteTime; renderStage(); startTimer(); };
   window.nextDefense = function () {
-    beep('click'); const c = game.court;
-    if (c.idx + 1 < c.accused.length) { c.idx++; remSec = timerTotal = game.voteTime; renderStage(); startTimer(); }
+    const c = game.court;
+    if (c.idx + 1 < c.accused.length) { beep('defense'); c.idx++; remSec = timerTotal = game.voteTime; renderStage(); startTimer(); }
     else window.startTally();
   };
   window.startTally = function () { snap(); clearInterval(timerInt); beep('click'); game.phase = 'tally'; renderStage(); };
-  window.tallyAdj = function (id, d) { const c = game.court; c.counts[id] = Math.max(0, (c.counts[id] || 0) + d); renderStage(); };
-  window.ketuaVote = function (id) { game.court.ketuaVote = id || null; renderStage(); };
-  window.ghostVote = function (gid, id) { if (id) game.court.ghosts[gid] = id; else delete game.court.ghosts[gid]; renderStage(); };
+  window.tallyAdj = function (id, d) { beep('tap'); const c = game.court; c.counts[id] = Math.max(0, (c.counts[id] || 0) + d); renderStage(); };
+  window.ketuaVote = function (id) { beep('vote'); game.court.ketuaVote = id || null; renderStage(); };
+  window.ghostVote = function (gid, id) { beep('vote'); if (id) game.court.ghosts[gid] = id; else delete game.court.ghosts[gid]; renderStage(); };
   window.finishTally = function () {
     const c = game.court, totals = tallyTotals();
     const max = Math.max(0, ...c.accused.map((id) => totals[id]));
@@ -1534,7 +1540,7 @@
   /* ==================== UNDIAN & MENANG ==================== */
   window.executeVote = function (pid, votes, snapped) {
     if (!snapped) snap();
-    clearInterval(timerInt); beep('click');
+    clearInterval(timerInt); beep(pid ? 'verdict' : 'click');
     const vp = pid ? gp(pid) : null; tempTargetId = null; game._dead = [];
     if (!vp) { game.logs.push(`Siang ${game.night}: Undian seri, tiada siapa dihalau.`); game.verdict = { kind: 'seri' }; game.phase = 'verdict'; renderStage(); return; }
     const vr = vp.role || 'orang_kampung';
@@ -1575,6 +1581,7 @@
   }
 
   loadStorage();
+  SND.setEnabled(soundOn);
   autoBal();
   // Kalau pautan dibuka dari QR (#j1...), tunjuk kad pemain sahaja. Kalau tidak, buka app biasa.
   const boot = () => { const c = decodeCard(location.hash.slice(1)); if (c) showCardView(c); else { cardView = null; $('pg_card').hidden = true; window.go('home'); } };
