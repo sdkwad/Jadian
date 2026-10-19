@@ -1,6 +1,6 @@
 /* Service worker Jadian: simpan semua fail app dalam cache supaya game boleh dibuka tanpa internet.
    Bila kau kemas kini app, NAIKKAN nombor VERSION di bawah supaya telefon pemain ambil fail baru. */
-const VERSION = 'jadian-v1.0.1';
+const VERSION = 'jadian-v1.1.2';
 const FILES = [
   './',
   'index.html',
@@ -8,6 +8,7 @@ const FILES = [
   'css/fonts.css',
   'css/style.css',
   'js/config.js',
+  'js/audio.js',
   'js/app.js',
   'vendor/qrcode.min.js',
   'fonts/LilitaOne-latin.woff2',
@@ -18,11 +19,18 @@ const FILES = [
   'assets/icons/icon-192.png',
   'assets/icons/icon-512.png',
   'assets/icons/maskable-512.png',
-  'assets/icons/apple-touch-icon.png'
+  'assets/icons/apple-touch-icon.png',
+  'assets/audio/malam-tiba.mp3',
+  'assets/audio/suasana-malam.mp3',
+  'assets/audio/pagi-aman.mp3',
+  'assets/audio/pagi-bahaya.mp3',
+  'assets/audio/menang-kampung.mp3',
+  'assets/audio/menang-harimau.mp3'
 ];
 
 self.addEventListener('install', (e) => {
-  e.waitUntil(caches.open(VERSION).then((c) => c.addAll(FILES)).then(() => self.skipWaiting()));
+  // cache: 'reload' = langkau cache HTTP pelayar, supaya versi baharu betul-betul ambil fail baharu dari pelayan.
+  e.waitUntil(caches.open(VERSION).then((c) => c.addAll(FILES.map((f) => new Request(f, { cache: 'reload' })))).then(() => self.skipWaiting()));
 });
 
 self.addEventListener('activate', (e) => {

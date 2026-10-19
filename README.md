@@ -11,10 +11,12 @@ Jadian/
 │   ├── css/style.css         gaya reka bentuk
 │   ├── css/fonts.css         font tempatan (tak perlu internet)
 │   ├── js/app.js             logik permainan & watak
+│   ├── js/audio.js           pengurus bunyi hibrid (fail .mp3 + sintesis Web Audio)
 │   ├── js/config.js          tetapan: URL rasmi untuk QR
 │   ├── vendor/qrcode.min.js  pustaka QR (MIT)
 │   ├── fonts/                Lilita One & Plus Jakarta Sans (SIL OFL)
 │   ├── assets/icons/         ikon app (192, 512, maskable, apple, svg)
+│   ├── assets/audio/         bunyi suasana .mp3 (ElevenLabs), lihat bahagian Bunyi
 │   ├── manifest.webmanifest  maklumat PWA (nama, ikon, warna)
 │   └── sw.js                 service worker: app jalan tanpa internet
 ├── resources/                sumber ikon & skrin pembukaan untuk APK
@@ -127,6 +129,29 @@ Dah siap:
 | `resources/splash.png` + `splash-dark.png` | 2732×2732 | Skrin pembukaan APK |
 
 Untuk ubah rupa ikon: edit `resources/icon-maker.html`, jalankan `tools\serve.ps1`, buka `http://localhost:8080/resources/icon-maker.html`, kemudian tekan **Simpan semua ke projek**.
+
+### Bunyi (sistem hibrid)
+
+Semua bunyi diurus oleh `www/js/audio.js` dan ikut suis **Bunyi** dalam Tetapan (dan butang pembesar suara di atas).
+
+**Kategori A: fail `.mp3`** dalam `www/assets/audio/`, dijana dengan ElevenLabs Sound Effects (dinormalkan, 80 kbps, jumlah ~330 KB):
+
+| Fail | Bila berbunyi |
+|---|---|
+| `malam-tiba.mp3` | Setiap kali malam bermula: gong, lolongan panjang, kemudian ngauman harimau (serentak dengan mata harimau dalam scene) |
+| `suasana-malam.mp3` | Gelung latar sepanjang malam, pudar masuk dan pudar keluar bila pagi |
+| `pagi-aman.mp3` | Pagi tanpa mangsa (ayam berkokok, burung pagi) |
+| `pagi-bahaya.mp3` | Pagi ada mangsa: kicau burung sekejap, dipotong kentung bertalu-talu |
+| `menang-kampung.mp3` | Kampung atau Pasangan Bercinta menang (kompang, ditutup gong) |
+| `menang-harimau.mp3` | Harimau Jadian menang |
+
+**Kategori B: sintesis Web Audio** (tiada fail): klik butang, tukar tab, kad terbalik, detik 10 saat terakhir, kentung 5 saat terakhir, amaran masa tamat, undian, tuduhan, bela diri dan keputusan Mahkamah Kampung.
+
+**Scene peralihan:** setiap kali malam atau pagi bermula, skrin penuh 4–5 saat dimainkan sebelum giliran pertama (matahari terbenam, bulan naik, lampu rumah padam, sepasang mata harimau; atau fajar menyingsing, dengan denyut merah bila ada mangsa). Ketik untuk langkau. Undo tak mainkan semula scene.
+
+Bunyi malam, pagi bahaya dan menang kampung ialah adunan beberapa unsur yang dijana berasingan (gong, lolongan, ngauman, kompang), disusun ikut masa scene dengan ffmpeg. Prompt ElevenLabs yang menggabungkan banyak bunyi dalam satu ayat cenderung hasilkan satu bunyi sahaja (contohnya gong), jadi jana setiap unsur berasingan.
+
+AudioContext dibuka dan fail `.mp3` dimuat pada sentuhan pertama (syarat autoplay Safari & Chrome). Kalau fail belum siap, versi sintesis dimainkan sebagai ganti. Untuk tukar bunyi, ganti fail dengan nama yang sama, kemudian naikkan versi (package.json, `js/config.js`, `sw.js`).
 
 ---
 
