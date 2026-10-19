@@ -5,5 +5,5 @@
    version: mesti sama dengan "version" dalam package.json dan VERSION dalam sw.js. */
 window.JADIAN_CONFIG = {
   publicUrl: 'https://jadian-hazel.vercel.app/',
-  version: '1.0.1'
+  version: '1.1.2'
 };

@@ -233,9 +233,9 @@
   .tab-play:disabled { background: var(--surface-3); color: var(--kabur); box-shadow: none; cursor: not-allowed; }
 
   /* ---------- Permainan ---------- */
-  .gbar { display: flex; align-items: center; gap: 8px; }
+  .gbar { display: flex; align-items: center; gap: 6px; }
   .gtitle { flex: 1; min-width: 0; }
-  .gname { font-family: var(--f-display); font-size: 24px; line-height: 1.05; letter-spacing: .02em; text-wrap: balance; }
+  .gname { font-family: var(--f-display); font-size: clamp(19px, 5.6vw, 24px); line-height: 1.05; letter-spacing: .02em; text-wrap: balance; }
   .gprogress { display: flex; flex-direction: column; gap: 6px; }
   .gprogress small { color: var(--kabur); font-size: 12px; font-weight: 700; }
   .steps { display: flex; gap: 4px; }
@@ -352,4 +352,78 @@
   .toast { position: fixed; left: 50%; bottom: calc(104px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); z-index: 40; background: var(--teks); color: #1c1608; padding: 10px 16px; border-radius: 12px; font-size: 13px; font-weight: 800; max-width: calc(100% - 32px); box-shadow: 0 10px 30px -10px #000; animation: toast .25s ease; }
   @keyframes toast { from { transform: translate(-50%, 8px); } to { transform: translate(-50%, 0); } }
 
+  /* ---------- Scene peralihan siang/malam ----------
+     Semua keadaan asas = keadaan AKHIR, animasi bermula dari keadaan awal (fill both).
+     Jadi bila animasi dimatikan (prefers-reduced-motion), scene terus tunjuk keadaan akhir. */
+  .scene { position: fixed; inset: 0; z-index: 20; overflow: hidden; display: grid; place-items: center; cursor: pointer; -webkit-user-select: none; user-select: none; }
+  .scene > * { position: absolute; pointer-events: none; }
+  .scene .sc-sky, .scene .sc-sky2, .scene .sc-stars, .scene .sc-flash { inset: 0; }
+  .scene { --kh: clamp(110px, 19vh, 190px); }
+  .scene .sc-kampung { left: 0; right: 0; bottom: 0; width: 100%; height: var(--kh); fill: #03050b; }
+  .scene .sc-kampung .win { fill: var(--emas); }
+  .scene .sc-stars { background-image: radial-gradient(1.4px 1.4px at 18px 26px, #fff, transparent), radial-gradient(1px 1px at 92px 70px, #ffffffb0, transparent), radial-gradient(1.6px 1.6px at 150px 18px, #fff, transparent), radial-gradient(1px 1px at 200px 120px, #ffffff90, transparent), radial-gradient(1.2px 1.2px at 60px 150px, #ffffffa0, transparent), radial-gradient(1px 1px at 236px 60px, #ffffffc0, transparent);
+    background-size: 260px 190px; -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 45%, transparent 75%); mask-image: linear-gradient(180deg, #000 0%, #000 45%, transparent 75%); }
+  .scene .sc-sun { width: 34vmin; height: 34vmin; left: calc(50% - 17vmin); bottom: 12vh; border-radius: 50%; background: radial-gradient(circle at 50% 50%, #fff6d6, #ffc35c 45%, #f08a3c 72%); box-shadow: 0 0 80px 30px rgba(240,138,60,.45); }
+  .scene .sc-moon { width: 24vmin; height: 24vmin; right: 12vw; top: 14vh; border-radius: 50%; background: radial-gradient(circle at 38% 36%, #fffbea, #e2b04a 65%, #9b6b15); box-shadow: 0 0 70px 18px rgba(226,176,74,.32); }
+  .scene .sc-eyes { left: calc(50% - 46px); bottom: calc(var(--kh) * .3); width: 92px; height: 16px; display: flex; justify-content: space-between; opacity: 0; }
+  .scene .sc-eyes i { width: 30px; height: 12px; border-radius: 50% 50% 50% 50% / 70% 70% 30% 30%; background: radial-gradient(circle at 50% 60%, #fff3b0 0 18%, #f08a3c 45%, #c9631d 70%, transparent 72%); box-shadow: 0 0 16px 5px rgba(240,138,60,.65); }
+  .scene .sc-eyes i:last-child { transform: scaleX(-1); }
+  .scene .sc-flash { background: radial-gradient(circle at 50% 70%, rgba(239,90,81,.55), rgba(239,90,81,0) 70%); opacity: 0; }
+  .scene .sc-text { position: relative; z-index: 2; text-align: center; padding: 0 24px; margin-top: -10vh; display: flex; flex-direction: column; gap: 6px; text-shadow: 0 2px 18px rgba(0,0,0,.6); }
+  .scene .sc-eyebrow { font-size: 12px; letter-spacing: .3em; text-transform: uppercase; font-weight: 800; color: var(--emas); }
+  .scene h2 { margin: 0; font-family: var(--f-display); font-size: clamp(38px, 12vw, 64px); line-height: 1; letter-spacing: .02em; color: var(--teks); }
+  .scene p { margin: 0; font-size: 16px; font-weight: 700; color: var(--teks); opacity: .9; }
+  .scene .sc-skip { bottom: calc(14px + env(safe-area-inset-bottom, 0px)); left: 0; right: 0; text-align: center; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: rgba(244,239,226,.45); font-weight: 800; z-index: 2; }
+  .scene.out { opacity: 0; transition: opacity .3s ease; }
+
+  /* Malam: senja oren, matahari terbenam, langit jadi nila, bulan naik, bintang muncul, lampu rumah padam, sepasang mata harimau. */
+  .scene.malam .sc-sky { background: linear-gradient(180deg, #3b2346 0%, #a5492f 55%, #f08a3c 100%); }
+  .scene.malam .sc-sky2 { background: linear-gradient(180deg, #03060f 0%, #0b1121 55%, #15203d 100%); }
+  .scene.malam .sc-sun { transform: translateY(70vh); }
+  .scene.malam .sc-kampung .win { opacity: .08; }
+  .scene.malam.go .sc-sky2 { animation: scFadeIn 2.2s .3s ease-in-out both; }
+  .scene.malam.go .sc-sun { animation: scSunSet 2.2s cubic-bezier(.5,0,.8,.6) both; }
+  .scene.malam.go .sc-moon { animation: scRise 1.8s 1.3s cubic-bezier(.2,.8,.2,1) both; }
+  .scene.malam.go .sc-stars { animation: scFadeIn 1.4s 1.6s ease both, scTwinkle 2.4s 3s ease-in-out infinite alternate; }
+  .scene.malam.go .sc-kampung .win { animation: scLightsOut 3.2s ease both; }
+  .scene.malam.go .sc-eyes { animation: scEyes 1.9s 2.5s ease both; }
+  .scene.malam .sc-eyes i { transform-origin: 50% 50%; }
+  .scene.malam.go .sc-eyes i { animation: scBlink 1.9s 2.5s both; }
+  .scene.malam.go .sc-eyes i:last-child { animation-name: scBlinkR; }
+
+  /* Pagi: langit nila jadi fajar jingga-merah jambu, bulan turun, matahari naik dengan sinar. Bahaya: denyut merah ikut pukulan kentung. */
+  .scene.pagi .sc-sky { background: linear-gradient(180deg, #03060f 0%, #0b1121 55%, #15203d 100%); }
+  .scene.pagi .sc-sky2 { background: linear-gradient(180deg, #2c3d6b 0%, #c96b6b 50%, #ffc982 100%); }
+  .scene.pagi .sc-stars { opacity: 0; }
+  .scene.pagi .sc-moon { transform: translateY(80vh); opacity: 0; }
+  .scene.pagi .sc-sun { bottom: 22vh; }
+  .scene.pagi .sc-kampung { fill: #1a0f12; }
+  .scene.pagi .sc-kampung .win { opacity: 0; }
+  .scene.pagi.go .sc-sky2 { animation: scFadeIn 2s .2s ease-in-out both; }
+  .scene.pagi.go .sc-stars { animation: scFadeOut 1.2s ease both; }
+  .scene.pagi.go .sc-moon { animation: scMoonSet 1.4s ease-in both; }
+  .scene.pagi.go .sc-sun { animation: scSunRise 2.4s .6s cubic-bezier(.2,.8,.2,1) both; }
+  .scene.pagi.bahaya .sc-sky2 { background: linear-gradient(180deg, #2a1830 0%, #8c3a3a 50%, #e98a5a 100%); }
+  .scene.pagi.bahaya.go .sc-flash { animation: scFlash .42s .95s ease-out 5 both; }
+  .scene.pagi.bahaya h2 { color: #ffb3ad; }
+
+  .scene.go .sc-text > * { animation: scTextUp .7s ease both; }
+  .scene.go .sc-text > :nth-child(1) { animation-delay: .4s; }
+  .scene.go .sc-text > :nth-child(2) { animation-delay: .7s; }
+  .scene.go .sc-text > :nth-child(3) { animation-delay: 1.4s; }
+  .scene.go .sc-skip { animation: scFadeIn .6s 1.2s both; }
+
+  @keyframes scFadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes scFadeOut { from { opacity: 1; } to { opacity: 0; } }
+  @keyframes scSunSet { from { transform: translateY(0); } to { transform: translateY(70vh); } }
+  @keyframes scSunRise { from { transform: translateY(60vh); box-shadow: 0 0 40px 10px rgba(240,138,60,.2); } to { transform: none; } }
+  @keyframes scRise { from { transform: translateY(60vh); opacity: 0; } to { transform: none; opacity: 1; } }
+  @keyframes scMoonSet { from { transform: none; opacity: 1; } to { transform: translateY(80vh); opacity: 0; } }
+  @keyframes scTwinkle { from { opacity: 1; } to { opacity: .55; } }
+  @keyframes scLightsOut { 0%, 70% { opacity: .95; } 74% { opacity: .2; } 78% { opacity: .8; } 100% { opacity: .08; } }
+  @keyframes scEyes { 0% { opacity: 0; } 18% { opacity: 1; } 80% { opacity: 1; } 100% { opacity: 0; } }
+  @keyframes scBlink { 0%, 44%, 52%, 100% { transform: scaleY(1); } 48% { transform: scaleY(.1); } }
+  @keyframes scBlinkR { 0%, 44%, 52%, 100% { transform: scale(-1, 1); } 48% { transform: scale(-1, .1); } }
+  @keyframes scFlash { from { opacity: 1; } to { opacity: 0; } }
+  @keyframes scTextUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
   @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
