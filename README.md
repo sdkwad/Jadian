@@ -22,7 +22,7 @@ Jadian/
 ├── tools/serve.ps1           server tempatan untuk uji di komputer
 ├── capacitor.config.json     tetapan pembungkusan APK
 ├── package.json              arahan npm untuk Capacitor
-├── vercel.json / netlify.toml / .github/workflows/pages.yml   tetapan hosting
+├── vercel.json               tetapan hosting (Vercel)
 └── README.md
 ```
 
@@ -46,27 +46,15 @@ Buka `http://localhost:8080/www/` dalam Chrome atau Edge.
 
 ## Fasa 2: Letak game di internet (percuma)
 
-Pilih **satu** sahaja.
+Game dihoskan di **Vercel**: https://jadian-hazel.vercel.app/
 
-### Pilihan A: Vercel (paling mudah)
+### Vercel
 1. Daftar di https://vercel.com (boleh guna akaun GitHub).
 2. **Add New → Project**, kemudian sama ada:
    - import repo GitHub kau, atau
    - pasang Vercel CLI dan jalankan `vercel` dalam folder ni.
 3. Fail `vercel.json` dah suruh Vercel terbitkan folder `www`. Tiada build command.
-4. Kau akan dapat URL seperti `https://jadian.vercel.app/`.
-
-### Pilihan B: Netlify
-1. Daftar di https://netlify.com.
-2. Cara terpantas: **Add new site → Deploy manually**, kemudian seret folder `www` ke dalam pelayar.
-3. Atau sambungkan repo GitHub. Fail `netlify.toml` dah tetapkan folder `www`.
-
-### Pilihan C: GitHub Pages
-1. Buat repo baru di GitHub, contohnya `jadian`.
-2. Push projek ni (lihat bahagian Git di bawah).
-3. Di GitHub: **Settings → Pages → Source: GitHub Actions**.
-4. Fail `.github/workflows/pages.yml` akan terbitkan `www/` setiap kali kau push ke `main`.
-5. URL: `https://NAMA-AKAUN.github.io/jadian/`.
+4. Setiap push ke `main` akan diterbitkan semula secara automatik.
 
 ### Selepas dapat URL (WAJIB)
 1. Buka `www/js/config.js` dan tukar `publicUrl` kepada URL kau, contohnya `https://jadian.vercel.app/`.
@@ -78,7 +66,12 @@ Ini penting untuk **QR dalam versi APK**. Di web, QR terus guna alamat halaman t
 Buka URL dalam Chrome (Android) → menu ⋮ → **Tambah ke skrin utama** / **Install app**. Di iPhone: Safari → Kongsi → **Add to Home Screen**.
 
 ### Kemas kini app
-Setiap kali kau ubah fail dalam `www/`, naikkan nombor `VERSION` dalam `www/sw.js` (contoh `jadian-v1.0.1`). Kalau tak, telefon yang dah pasang akan terus guna versi lama dari cache.
+Setiap kali kau ubah fail dalam `www/`, naikkan nombor versi di **tiga** tempat serentak supaya sama:
+- `package.json` → `"version": "1.0.2"`
+- `www/js/config.js` → `version: '1.0.2'`
+- `www/sw.js` → `const VERSION = 'jadian-v1.0.2'`
+
+Kalau `VERSION` dalam `sw.js` tak dinaikkan, telefon yang dah pasang akan terus guna versi lama dari cache.
 
 ---
 
@@ -107,8 +100,6 @@ git remote add origin https://github.com/NAMA-AKAUN/jadian.git
 ```bash
 git push -u origin main
 ```
-
-> Tak nak guna Git? Pilihan B (Netlify, seret folder `www`) tak perlukan Git langsung.
 
 ---
 
